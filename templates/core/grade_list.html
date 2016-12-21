@@ -1,0 +1,12 @@
+<h1>Список классов:</h1>
+<ul>
+{% for grade in object_list %}
+    <li>
+        <a href="{% url 'student-list' grade_id=grade.id %}">
+            {{ grade.graduation_year }} ({{ grade.letter }})
+        </a>
+    </li>
+{% empty %}
+    <li>Пусто.</li>
+{% endfor %}
+</ul>

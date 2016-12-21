@@ -1,0 +1,24 @@
+<p>
+    <a href="{% url 'grade-list' %}">
+        Назад к списку классов
+    </a>
+    /
+    <a href="{% url 'student-list' grade_id=object.main_grade.id %}">
+        Назад к списку учеников
+    </a>
+</p>
+
+<h1>{{ object.name }}</h1>
+
+{% for field, modifications in grouped_modifications.items %}
+    <h3>{{ modifications.0.get_field_name_display }}</h3>
+
+    <ul>
+    {% for modification in modifications %}
+        <li {% if modification.status != 'trusted' %}style="color: #aaa;"{% endif %}>
+            {{ modification.field_value }}
+        </li>
+    {% endfor %}
+    </ul>
+{% endfor %}
+

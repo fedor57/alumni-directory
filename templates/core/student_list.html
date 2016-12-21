@@ -1,0 +1,19 @@
+<p>
+    <a href="{% url 'grade-list' %}">
+        Назад к списку классов
+    </a>
+</p>
+
+<h1>Список выпускников класса "{{ grade.letter }}" {{ grade.graduation_year }} года выпуска:</h1>
+<ul>
+{% for student in object_list %}
+    <li>
+        <a href="{% url 'student-detail' pk=student.id %}">
+            {{ student.name }}
+        </a>
+    </li>
+{% empty %}
+    <li>Пусто.</li>
+{% endfor %}
+</ul>
+
