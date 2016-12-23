@@ -1,0 +1,7 @@
+<p><a href="{% url 'grade-list' %}">Назад к списку классов</a></p>
+<h1>Добавить выпускника</h1>
+<form action="{% url 'student-create' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Добавить" />
+</form>

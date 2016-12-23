@@ -1,8 +1,13 @@
+# coding=utf-8
 import itertools
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.http import Http404
-from models import Grade, Student
+from django.views.generic.edit import CreateView
+from django.http import Http404, HttpResponseRedirect
+from django.urls import reverse
+
+from models import Grade, Student, FieldValue, AuthCode
+from forms import StudentCreateForm, FieldValueForm
 
 
 class GradeListView(ListView):
@@ -46,6 +51,60 @@ class StudentDetailView(DetailView):
         return context_data
 
 
+class StudentCreateView(CreateView):
+    model = Student
+    form_class = StudentCreateForm
+
+    def get_initial(self):
+        """
+        Если id класса есть в url, добавляем год и букву в initial
+        """
+        initial = super(StudentCreateView, self).get_initial()
+        if 'grade_id' in self.kwargs:
+            try:
+                grade = Grade.objects.get(id=self.kwargs.get('grade_id'))
+            except Grade.objects.DoesNotExist:
+                pass
+            else:
+                initial['graduation_year'] = grade.graduation_year
+                initial['grade_letter'] = grade.letter
+        return initial
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+
+        # Привязываем код авторизации и создаем для него запись в таблице кодов
+        if 'auth_code' in form.cleaned_data:
+            author_code = AuthCode.objects.get_by_code(
+                form.cleaned_data['auth_code'])
+            self.object.creator_code = author_code
+
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
+class FieldValueCreateView(CreateView):
+    model = FieldValue
+    form_class = FieldValueForm
 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+
+        # Привязываем правку к выпускнику по id из урла
+        student_id = self.kwargs.get('pk')
+        try:
+            self.object.target = Student.objects.get(id=student_id)
+        except Student.objects.DoesNotExist:
+            return Http404()
+
+        # Привязываем код авторизации и создаем для него запись в таблице кодов
+        if 'auth_code' in form.cleaned_data:
+            author_code = AuthCode.objects.get_by_code(
+                form.cleaned_data['auth_code'])
+            self.object.author_code = author_code
+
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('student-detail', args=[str(self.kwargs['pk'])])

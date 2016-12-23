@@ -1,6 +1,7 @@
 # coding=utf-8
-
 from django.db import models
+from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Timestamped(models.Model):
@@ -25,19 +26,47 @@ class Grade(models.Model):
         return u'%s "%s"' % (self.graduation_year, self.letter)
 
 
+class AuthCodeManager(models.Manager):
+    def get_by_code(self, code):
+        try:
+            author_code = self.get(code=code)
+        except ObjectDoesNotExist:
+            # TODO: resolve code to real name and status
+            author_code = self.create(
+                code=code, status='active', owner_name='Anonymous'
+            )
+        return author_code
+
+
+class AuthCode(models.Model):
+    STATUS_CHOICES = (
+        ('active', u'Активный'),
+        ('blocked', u'Заблокированный'),
+    )
+
+    code = models.CharField(max_length=100, primary_key=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    owner_name = models.CharField(max_length=200)
+
+    objects = AuthCodeManager()
+
+    def __unicode__(self):
+        return u'%s (%s)' % (self.code, self.owner_name)
+
+
 class Student(Timestamped):
     """
     Выпускник
     """
     name = models.CharField(max_length=200)
     main_grade = models.ForeignKey(Grade)
-    # TODO: заменить auth_code моделью со статусом кода
-    auth_code = models.CharField(max_length=100, blank=True)
-    creator = models.ForeignKey('self', related_name='students_created',
-                                blank=True, null=True)
+    creator_code = models.ForeignKey(AuthCode, blank=True, null=True)
 
     def __unicode__(self):
         return u'%s (%s)' % (self.name, self.main_grade)
+
+    def get_absolute_url(self):
+        return reverse('student-detail', args=[str(self.id)])
 
 
 class FieldValueManager(models.Manager):
@@ -68,8 +97,8 @@ class FieldValue(Timestamped):
 
     target = models.ForeignKey(Student, related_name='modifications',
                                help_text='Student to modify')
-    author = models.ForeignKey(Student, related_name='modify_activity',
-                               blank=True, null=True)
+    author_code = models.ForeignKey(AuthCode, related_name='modify_activity',
+                                    blank=True, null=True)
     field_name = models.CharField(choices=EDITABLE_FIELDS, max_length=20,
                                   help_text='Name of field in student data')
     field_value = models.CharField(max_length=200)
@@ -88,11 +117,12 @@ class Vote(Timestamped):
     а также может быть голосованием за правильность или наличие ошибки
     """
     field_value = models.ForeignKey(FieldValue, related_name='votes')
-    author = models.ForeignKey(Student, related_name='votes')
+    author_code = models.ForeignKey(AuthCode, related_name='votes')
+
     value = models.BooleanField(help_text='True is upvote, False is downvote')
 
     class Meta:
-        unique_together = ('field_value', 'author')
+        unique_together = ('field_value', 'author_code')
 
     # TODO: при добавлении голоса обновлять статус поля (self.field_name.status)
 
