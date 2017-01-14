@@ -1,4 +1,6 @@
 # coding=utf-8
+from __future__ import unicode_literals
+
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
@@ -23,7 +25,7 @@ class Grade(models.Model):
         unique_together = ('letter', 'graduation_year')
 
     def __unicode__(self):
-        return u'%s "%s"' % (self.graduation_year, self.letter)
+        return '%s "%s"' % (self.graduation_year, self.letter)
 
 
 class AuthCodeManager(models.Manager):
@@ -40,8 +42,8 @@ class AuthCodeManager(models.Manager):
 
 class AuthCode(models.Model):
     STATUS_CHOICES = (
-        ('active', u'Активный'),
-        ('blocked', u'Заблокированный'),
+        ('active', 'Активный'),
+        ('blocked', 'Заблокированный'),
     )
 
     code = models.CharField(max_length=100, primary_key=True)
@@ -51,7 +53,7 @@ class AuthCode(models.Model):
     objects = AuthCodeManager()
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.code, self.owner_name)
+        return '%s (%s)' % (self.code, self.owner_name)
 
 
 class Student(Timestamped):
@@ -63,7 +65,7 @@ class Student(Timestamped):
     creator_code = models.ForeignKey(AuthCode, blank=True, null=True)
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.main_grade)
+        return '%s (%s)' % (self.name, self.main_grade)
 
     def get_absolute_url(self):
         return reverse('student-detail', args=[str(self.id)])
@@ -79,49 +81,82 @@ class FieldValue(Timestamped):
     Каждая правка предлагает добавить значение поля
     """
     # Типы правок (field_name)
+    FIELD_NAME = 'name'
+    FIELD_EMAIL = 'email'
+    FIELD_CITY = 'city'
+    FIELD_COMPANY = 'company'
+    FIELD_LINK = 'link'
+    FIELD_SOCIAL_VK = 'social_vk'
+    FIELD_SOCIAL_FB = 'social_fb'
+    FIELD_GRADE = 'grade'
     EDITABLE_FIELDS = (
-        ('name', u'Информация об изменении имени/фамилии'),
-        ('email', u'Email, который не отображается, '
-                  u'но на который можно написать через форму'),
-        ('city', u'Город'),
-        ('company', u'Компания'),
-        ('link', u'Ссылка'),
-        ('extra_grade', u'Класс'),
+        (FIELD_NAME, 'Информация об изменении имени/фамилии'),
+        (FIELD_EMAIL, 'Email, который не отображается, '
+                      'но на который можно написать через форму'),
+        (FIELD_CITY, 'Город'),
+        (FIELD_COMPANY, 'Компания/ВУЗ'),
+        (FIELD_LINK, 'Ссылка'),
+        (FIELD_SOCIAL_FB, 'Facebook'),
+        (FIELD_SOCIAL_VK, 'ВКонтакте'),
+        (FIELD_GRADE, 'Класс'),
     )
+
+    STATUS_TRUSTED = 'trusted'
+    STATUS_UNTRUSTED = 'untrusted'
+    STATUS_HIDDEN = 'hidden'
+    STATUS_DELETED = 'deleted'
     STATUS_CHOICES = (
-        ('trusted', u'Уверенное значение'),
-        ('untrusted', u'Под сомнением'),
-        ('suspicious', u'Подозрительное'),
-        ('hidden', u'Скрытое'),
+        (STATUS_TRUSTED, 'Уверенная'),
+        (STATUS_UNTRUSTED, 'Неуверенная'),
+        (STATUS_HIDDEN, 'Скрытая'),
+        (STATUS_DELETED, 'Удаленная'),
     )
 
     target = models.ForeignKey(Student, related_name='modifications',
-                               help_text='Student to modify')
-    author_code = models.ForeignKey(AuthCode, related_name='modify_activity',
-                                    blank=True, null=True)
-    field_name = models.CharField(choices=EDITABLE_FIELDS, max_length=20,
-                                  help_text='Name of field in student data')
-    field_value = models.CharField(max_length=200)
-    status = models.CharField(choices=STATUS_CHOICES, default='trusted', max_length=20)
+                               help_text='Выпускник')
+    author_code = models.ForeignKey(
+        AuthCode, related_name='modify_activity',
+        verbose_name='Автор правки',
+        blank=True, null=True)
+    field_name = models.CharField(
+        'Имя поля', choices=EDITABLE_FIELDS, max_length=20)
+    field_value = models.CharField('Значение поля', max_length=200)
+    status = models.CharField('Статус правки', choices=STATUS_CHOICES,
+                              default=STATUS_TRUSTED, max_length=20)
+    status_update_date = models.DateTimeField('Дата обновления статуса')
 
     objects = FieldValueManager()
 
     # TODO: при сохранении проверять unique_together('target', 'author', 'field_name')
 
     def __unicode__(self):
-        return u'%s _ %s' % (self.target, self.get_field_name_display())
+        return '%s _ %s' % (self.target, self.get_field_name_display())
 
 
 class Vote(Timestamped):
     """
     а также может быть голосованием за правильность или наличие ошибки
     """
-    field_value = models.ForeignKey(FieldValue, related_name='votes')
-    author_code = models.ForeignKey(AuthCode, related_name='votes')
+    field_value = models.ForeignKey(
+        FieldValue, verbose_name='Поле', related_name='votes')
+    author_code = models.ForeignKey(
+        AuthCode, verbose_name='Код автора голоса', related_name='votes')
 
-    value = models.BooleanField(help_text='True is upvote, False is downvote')
+    VOTE_ADDED = 'added'
+    VOTE_UP = 'upvoted'
+    VOTE_DOWN = 'downvoted'
+    VOTE_TO_DEL = 'to_delete'
+    VOTE_CHOICES = (
+        (VOTE_ADDED, 'добавлено'),
+        (VOTE_UP, 'за'),
+        (VOTE_DOWN, 'против'),
+        (VOTE_TO_DEL, 'удалить'),
+    )
+    value = models.CharField('Тип голоса', choices=VOTE_CHOICES, max_length=16)
 
     class Meta:
+        verbose_name = 'голос'
+        verbose_name_plural = 'голоса'
         unique_together = ('field_value', 'author_code')
 
     # TODO: при добавлении голоса обновлять статус поля (self.field_name.status)
