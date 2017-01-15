@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
+from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
@@ -22,6 +23,8 @@ class Grade(models.Model):
     # TODO: добавить читаемый id
 
     class Meta:
+        verbose_name = 'класс'
+        verbose_name_plural = 'классы'
         unique_together = ('letter', 'graduation_year')
 
     def __unicode__(self):
@@ -41,14 +44,26 @@ class AuthCodeManager(models.Manager):
 
 
 class AuthCode(models.Model):
+    STATUS_VALID = 'valid'
+    STATUS_NONEXISTENT = 'nonexistent'
+    STATUS_REVOKED = 'revoked'
     STATUS_CHOICES = (
-        ('active', 'Активный'),
-        ('blocked', 'Заблокированный'),
+        (STATUS_VALID, 'валиден'),
+        (STATUS_NONEXISTENT, 'несуществующий'),
+        (STATUS_REVOKED, 'отозван'),
     )
 
-    code = models.CharField(max_length=100, primary_key=True)
+    code = models.CharField(
+        validators=[RegexValidator(r'^[^\s]+$')],
+        max_length=100, primary_key=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     owner_name = models.CharField(max_length=200)
+    updated_at = models.DateTimeField('Дата обновления данных')
+    revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'код авторизации'
+        verbose_name_plural = 'коды авторизации'
 
     objects = AuthCodeManager()
 
@@ -63,6 +78,10 @@ class Student(Timestamped):
     name = models.CharField(max_length=200)
     main_grade = models.ForeignKey(Grade)
     creator_code = models.ForeignKey(AuthCode, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'выпускник'
+        verbose_name_plural = 'выпускники'
 
     def __unicode__(self):
         return '%s (%s)' % (self.name, self.main_grade)
@@ -126,6 +145,10 @@ class FieldValue(Timestamped):
     status_update_date = models.DateTimeField('Дата обновления статуса')
 
     objects = FieldValueManager()
+
+    class Meta:
+        verbose_name = 'правка'
+        verbose_name_plural = 'правки'
 
     # TODO: при сохранении проверять unique_together('target', 'author', 'field_name')
 
