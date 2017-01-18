@@ -10,13 +10,19 @@
 
 <h1>{{ object.name }}</h1>
 
-{% for field, modifications in grouped_modifications.items %}
+{% for field, modifications in grouped_modifications %}
     <h3>{{ modifications.0.get_field_name_display }}</h3>
 
     <ul>
     {% for modification in modifications %}
-        <li {% if modification.status != 'trusted' %}style="color: #aaa;"{% endif %}>
+        <li class="
+            {% if modification.status == 'trusted' %}field-trusted{% else %}
+                {% if modification.status == 'untrusted' %}field-trusted{% else %}field-hidden{% endif %}
+            {% endif %}">
             {{ modification.field_value }}
+            <a href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}">+</a>
+            <a href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}">-</a>
+            <a href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}">X</a>
         </li>
     {% endfor %}
     </ul>

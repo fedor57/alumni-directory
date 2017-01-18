@@ -1,10 +1,14 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
+from collections import Counter
+
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models.aggregates import Count
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 
 class Timestamped(models.Model):
@@ -58,7 +62,7 @@ class AuthCode(models.Model):
         max_length=100, primary_key=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     owner_name = models.CharField(max_length=200)
-    updated_at = models.DateTimeField('Дата обновления данных')
+    updated_at = models.DateTimeField('Дата обновления данных', auto_now=True)
     revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
 
     class Meta:
@@ -142,7 +146,8 @@ class FieldValue(Timestamped):
     field_value = models.CharField('Значение поля', max_length=200)
     status = models.CharField('Статус правки', choices=STATUS_CHOICES,
                               default=STATUS_TRUSTED, max_length=20)
-    status_update_date = models.DateTimeField('Дата обновления статуса')
+    status_update_date = models.DateTimeField(
+        'Дата обновления статуса', null=True, blank=True)
 
     objects = FieldValueManager()
 
@@ -150,10 +155,60 @@ class FieldValue(Timestamped):
         verbose_name = 'правка'
         verbose_name_plural = 'правки'
 
-    # TODO: при сохранении проверять unique_together('target', 'author', 'field_name')
+    def save(self, *args, **kwargs):
+        # Проверяем уникальность ('target', 'author', 'field_name')
+        if self.author_code_id and FieldValue.objects.filter(
+                target=self.target_id,
+                author_code=self.author_code_id,
+                field_name=self.field_name).exists():
+            raise ValueError('Повтор значения')
+        super(FieldValue, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return '%s _ %s' % (self.target, self.get_field_name_display())
+
+    @classmethod
+    def update_status(cls, target_id, field_name):
+        votes = Counter()
+        values = {}
+        qs = cls.objects.filter(
+            target_id=target_id,
+            field_name=field_name
+        ).exclude(status=cls.STATUS_DELETED)
+
+        fresh = qs.order_by('-timestamp').first()
+
+        for i in qs.filter(votes__value__in=
+                           (Vote.VOTE_ADDED, Vote.VOTE_UP)) \
+                .annotate(cv=Count('votes')) \
+                .defer('id', 'status'):
+            values[i.pk] = i
+            votes[i.pk] += i.cv
+        for i in qs.filter(votes__value=Vote.VOTE_DOWN) \
+                .annotate(cv=Count('votes')) \
+                .defer('id', 'status'):
+            values[i.pk] = i
+            votes[i.pk] -= i.cv
+
+        votes = sorted(votes.items(), key=lambda v: v[1], reverse=True)
+        if len(votes) == 0:
+            return
+        is_first = True
+        for pk, c in votes:
+            f = values[pk]
+            if c < 0:
+                need_status = FieldValue.STATUS_HIDDEN
+            elif is_first or fresh.pk == pk or \
+                    fresh.field_name == cls.FIELD_LINK:
+                need_status = FieldValue.STATUS_TRUSTED
+            else:
+                need_status = FieldValue.STATUS_UNTRUSTED
+
+            if f.status != need_status:
+                f.status = need_status
+                f.status_update_date = timezone.now()
+                f.save(update_fields=['status', 'status_update_date'])
+            is_first = False
 
 
 class Vote(Timestamped):
@@ -163,7 +218,8 @@ class Vote(Timestamped):
     field_value = models.ForeignKey(
         FieldValue, verbose_name='Поле', related_name='votes')
     author_code = models.ForeignKey(
-        AuthCode, verbose_name='Код автора голоса', related_name='votes')
+        AuthCode, verbose_name='Код автора голоса',
+        related_name='votes', blank=True, null=True)
 
     VOTE_ADDED = 'added'
     VOTE_UP = 'upvoted'
@@ -182,7 +238,12 @@ class Vote(Timestamped):
         verbose_name_plural = 'голоса'
         unique_together = ('field_value', 'author_code')
 
-    # TODO: при добавлении голоса обновлять статус поля (self.field_name.status)
-
     def __unicode__(self):
-        return self.field_value
+        return self.field_value.field_value
+
+    def save(self, *args, **kwargs):
+        super(Vote, self).save(*args, **kwargs)
+        self.field_value.update_status(
+            self.field_value.target_id,
+            self.field_value.field_name,
+        )

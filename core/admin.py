@@ -11,5 +11,19 @@ from models import (
 admin.site.register(Grade)
 admin.site.register(AuthCode)
 admin.site.register(Student)
-admin.site.register(FieldValue)
-admin.site.register(Vote)
+
+
+@admin.register(FieldValue)
+class AdminFieldValue(admin.ModelAdmin):
+    list_display = ('target', 'field_value', 'status')
+
+
+@admin.register(Vote)
+class AdminVote(admin.ModelAdmin):
+    def field_value(self):
+        return self.field_value.field_value
+
+    def field_target(self):
+        return self.field_value.target
+
+    list_display = (field_target, field_value, 'author_code', 'value')

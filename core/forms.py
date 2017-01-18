@@ -1,13 +1,15 @@
 # coding=utf-8
+from __future__ import unicode_literals
+
 from django import forms
-from models import Grade, Student, FieldValue
+from .models import Grade, Student, FieldValue, Vote
 
 
 class StudentCreateForm(forms.ModelForm):
-    name = forms.CharField(label=u'Фамилия Имя')
-    graduation_year = forms.IntegerField(label=u'Год выпуска')
-    grade_letter = forms.CharField(label=u'Буква класса')
-    auth_code = forms.CharField(label=u'Код авторизации', required=False)
+    name = forms.CharField(label='Фамилия Имя')
+    graduation_year = forms.IntegerField(label='Год выпуска')
+    grade_letter = forms.CharField(label='Буква класса')
+    auth_code = forms.CharField(label='Код авторизации', required=False)
 
     class Meta:
         model = Student
@@ -27,10 +29,10 @@ class StudentCreateForm(forms.ModelForm):
 
 
 class FieldValueForm(forms.ModelForm):
-    field_name = forms.ChoiceField(label=u'Тип правки',
+    field_name = forms.ChoiceField(label='Тип правки',
                                    choices=FieldValue.EDITABLE_FIELDS)
-    field_value = forms.CharField(label=u'Значение правки')
-    auth_code = forms.CharField(label=u'Код авторизации', required=False)
+    field_value = forms.CharField(label='Значение правки')
+    auth_code = forms.CharField(label='Код авторизации', required=False)
 
     class Meta:
         model = FieldValue
@@ -39,3 +41,11 @@ class FieldValueForm(forms.ModelForm):
     # def clean_author_code(self):
     #     TODO: validate
         # return self.cleaned_data['author_code']
+
+
+class VoteForm(forms.ModelForm):
+    auth_code = forms.CharField(label='Код авторизации', required=False)
+
+    class Meta:
+        model = Vote
+        fields = ('auth_code',)

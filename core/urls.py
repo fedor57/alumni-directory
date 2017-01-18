@@ -5,6 +5,7 @@ from views import (
     StudentDetailView,
     StudentCreateView,
     FieldValueCreateView,
+    VoteCreateView,
 )
 
 
@@ -19,5 +20,7 @@ urlpatterns = [
     url(r'^(?P<grade_id>[0-9]+)/students/add/$', StudentCreateView.as_view(),
         name='grade-student-create'),
     url(r'^students/(?P<pk>[0-9]+)/add_value/$', FieldValueCreateView.as_view(),
-        name='student-value-create')
+        name='student-value-create'),
+    url(r'^fields/(?P<pk>[0-9]+)/(?P<vote_type>\w+)/$', VoteCreateView.as_view(),
+        name='field-vote'),
 ]
