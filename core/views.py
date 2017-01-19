@@ -15,9 +15,11 @@ from forms import StudentCreateForm, FieldValueForm, VoteForm, SendMailForm
 
 class GradeListView(ListView):
     model = Grade
+    template_name = 'core/grade_list.jade'
 
 
 class GradeStudentListView(ListView):
+    template_name = 'core/student_list.jade'
     model = Student
 
     def get(self, request, *args, **kwargs):

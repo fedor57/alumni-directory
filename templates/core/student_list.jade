@@ -1,0 +1,24 @@
+extends 'core/base.html'
+
+block nav
+    li
+        a(href="/") Список классов
+    li.active
+        a Класс "{{ grade.letter }}" выпуск {{ grade.graduation_year }} года
+
+block content
+    h1
+        | Список выпускников класса "{{ grade.letter }}"
+        | {{ grade.graduation_year }} года выпуска:
+
+    ul
+        - for student in object_list
+            li
+                a(href="{% url 'student-detail' pk=student.id %}") {{ student.name }}
+
+            - empty
+                li Пусто.
+
+    p
+        a.btn.btn-default(href="{% url 'grade-student-create' grade_id=grade.id %}")
+            | Добавить выпускника
