@@ -49,3 +49,12 @@ class VoteForm(AuthCodeBase):
     class Meta:
         model = Vote
         fields = ('auth_code',)
+
+
+class SendMailForm(forms.ModelForm):
+    subject = forms.CharField(label='Тема письма')
+    message = forms.CharField(label='Тело сообщения', widget=forms.Textarea())
+
+    class Meta:
+        model = FieldValue
+        fields = ('subject', 'message')

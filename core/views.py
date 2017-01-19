@@ -1,5 +1,7 @@
 # coding=utf-8
 import itertools
+
+from django.core.mail import send_mail
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
@@ -8,7 +10,7 @@ from django.http import \
 from django.urls import reverse
 
 from models import Grade, Student, FieldValue, AuthCode, Vote
-from forms import StudentCreateForm, FieldValueForm, VoteForm
+from forms import StudentCreateForm, FieldValueForm, VoteForm, SendMailForm
 
 
 class GradeListView(ListView):
@@ -140,6 +142,34 @@ class VoteCreateView(CreateView):
             self.object.author_code = author_code
 
         self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('student-detail', kwargs={
+            'pk': str(self.object.field_value.target_id)
+        })
+
+
+class SendMailView(CreateView):
+    template_name = 'core/sendmail_form.html'
+    model = FieldValue
+    form_class = SendMailForm
+
+    def form_valid(self, form):
+        # Идентификатор FieldValue c email
+        fv_id = self.kwargs.get('pk')
+        try:
+            email = FieldValue.objects.get(id=fv_id).field_value
+        except FieldValue.objects.DoesNotExist:
+            return Http404()
+
+        send_mail(
+            form.cleaned_data['subject'],
+            form.cleaned_data['message'],
+            None,
+            [email],
+        )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

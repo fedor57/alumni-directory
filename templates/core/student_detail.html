@@ -32,12 +32,16 @@
                 <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
             {% elif modification.field_name == 'link' %}
                 <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
+            {% elif modification.field_name == 'email' %}
+                <a href="{% url 'field-sendmail' pk=modification.pk %}">Отправить сообщение</a>
             {% else %}
                 {{ modification.field_value }}
             {% endif %}
-            <a href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}">+</a>
-            <a href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}">-</a>
-            <a href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}">X</a>
+            {% if modification.field_name != 'email' %}
+                <a href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}">+</a>
+                <a href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}">-</a>
+                <a href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}">X</a>
+            {% endif %}
         </li>
     {% endfor %}
     </ul>

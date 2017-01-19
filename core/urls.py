@@ -6,6 +6,7 @@ from views import (
     StudentCreateView,
     FieldValueCreateView,
     VoteCreateView,
+    SendMailView,
 )
 
 
@@ -23,4 +24,6 @@ urlpatterns = [
         name='student-value-create'),
     url(r'^fields/(?P<pk>[0-9]+)/(?P<vote_type>\w+)/$', VoteCreateView.as_view(),
         name='field-vote'),
+    url(r'^sendmail/(?P<pk>[0-9]+)/$', SendMailView.as_view(),
+        name='field-sendmail'),
 ]
