@@ -28,16 +28,12 @@
             {% endif %}">
             {% if modification.field_name == 'social_vk' %}
                 <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
+            {% elif modification.field_name == 'social_fb' %}
+                <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
+            {% elif modification.field_name == 'link' %}
+                <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
             {% else %}
-                {% if modification.field_name == 'social_fb' %}
-                    <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
-                {% else %}
-                    {% if modification.field_name == 'link' %}
-                        <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
-                    {% else %}
-                        {{ modification.field_value }}
-                    {% endif %}
-                {% endif %}
+                {{ modification.field_value }}
             {% endif %}
             <a href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}">+</a>
             <a href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}">-</a>
