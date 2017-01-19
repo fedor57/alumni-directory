@@ -5,11 +5,14 @@ from django import forms
 from .models import Grade, Student, FieldValue, Vote
 
 
-class StudentCreateForm(forms.ModelForm):
+class AuthCodeBase(forms.ModelForm):
+    auth_code = forms.CharField(label='Код авторизации', required=False)
+
+
+class StudentCreateForm(AuthCodeBase):
     name = forms.CharField(label='Фамилия Имя')
     graduation_year = forms.IntegerField(label='Год выпуска')
     grade_letter = forms.CharField(label='Буква класса')
-    auth_code = forms.CharField(label='Код авторизации', required=False)
 
     class Meta:
         model = Student
@@ -28,11 +31,10 @@ class StudentCreateForm(forms.ModelForm):
         return instance
 
 
-class FieldValueForm(forms.ModelForm):
+class FieldValueForm(AuthCodeBase):
     field_name = forms.ChoiceField(label='Тип правки',
                                    choices=FieldValue.EDITABLE_FIELDS)
     field_value = forms.CharField(label='Значение правки')
-    auth_code = forms.CharField(label='Код авторизации', required=False)
 
     class Meta:
         model = FieldValue
@@ -43,9 +45,7 @@ class FieldValueForm(forms.ModelForm):
         # return self.cleaned_data['author_code']
 
 
-class VoteForm(forms.ModelForm):
-    auth_code = forms.CharField(label='Код авторизации', required=False)
-
+class VoteForm(AuthCodeBase):
     class Meta:
         model = Vote
         fields = ('auth_code',)
