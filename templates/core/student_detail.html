@@ -26,7 +26,19 @@
             {% if modification.status == 'trusted' %}field-trusted{% else %}
                 {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
             {% endif %}">
-            {{ modification.field_value }}
+            {% if modification.field_name == 'social_vk' %}
+                <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
+            {% else %}
+                {% if modification.field_name == 'social_fb' %}
+                    <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
+                {% else %}
+                    {% if modification.field_name == 'link' %}
+                        <a href="{{ modification.field_value }}">{{ modification.field_value }}</a>
+                    {% else %}
+                        {{ modification.field_value }}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
             <a href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}">+</a>
             <a href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}">-</a>
             <a href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}">X</a>
