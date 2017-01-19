@@ -30,6 +30,7 @@ class Grade(models.Model):
         verbose_name = 'класс'
         verbose_name_plural = 'классы'
         unique_together = ('letter', 'graduation_year')
+        ordering = ('-graduation_year', 'letter')
 
     def __unicode__(self):
         return '%s "%s"' % (self.graduation_year, self.letter)
