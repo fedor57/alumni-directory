@@ -1,0 +1,12 @@
+
+form(action="{% url 'student-value-create' pk=object.pk %}", method="post")
+  - csrf_token
+  .form-group
+    label Тип факта
+    select.form-control(name='field_name')
+      - for val, descr in field_types
+        option(value='{{ val }}') {{ descr }}
+  .form-group
+    label Значение
+    input.form-control(name='field_value', type='text', required='required')
+  button.btn.btn-default(type='submit') Добавить факт

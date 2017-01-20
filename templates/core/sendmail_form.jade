@@ -1,0 +1,11 @@
+
+form#sendmail(action="{% url 'field-sendmail' pk=field_email.pk %}", method="post")
+  - csrf_token
+  .form-group
+    label Тема сообщения
+    input.form-control(name='subject', type='text', placeholder='')
+  .form-group
+    label Тело сообщения
+    textarea.form-control(name='message', rows="5")
+
+  button.btn.btn-default(type='submit') Отправить

@@ -1,0 +1,14 @@
+extends 'core/base.html'
+
+block nav
+    li
+        a(href="/") Список классов
+    li.active
+        a Добавление выпускника
+
+block content
+    h1 Добавить выпускника
+    form(action="{% url 'student-create' %}", method="post")
+        {% csrf_token %}
+        {{ form.as_p }}
+        input(type="submit", value="Добавить")

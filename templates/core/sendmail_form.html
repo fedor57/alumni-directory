@@ -1,7 +1,0 @@
-<p><a href="{% url 'grade-list' %}">Назад к списку классов</a></p>
-<h1>Отправка сообщения </h1>
-<form action="." method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Отправить" />
-</form>

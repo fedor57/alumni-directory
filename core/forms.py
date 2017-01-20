@@ -5,18 +5,14 @@ from django import forms
 from .models import Grade, Student, FieldValue, Vote
 
 
-class AuthCodeBase(forms.ModelForm):
-    auth_code = forms.CharField(label='Код авторизации', required=False)
-
-
-class StudentCreateForm(AuthCodeBase):
+class StudentCreateForm(forms.ModelForm):
     name = forms.CharField(label='Фамилия Имя')
     graduation_year = forms.IntegerField(label='Год выпуска')
     grade_letter = forms.CharField(label='Буква класса')
 
     class Meta:
         model = Student
-        fields = ('name', 'graduation_year', 'grade_letter', 'auth_code')
+        fields = ('name', 'graduation_year', 'grade_letter')
 
     # TODO: add validation
 
@@ -31,24 +27,18 @@ class StudentCreateForm(AuthCodeBase):
         return instance
 
 
-class FieldValueForm(AuthCodeBase):
+class FieldValueForm(forms.ModelForm):
     field_name = forms.ChoiceField(label='Тип правки',
                                    choices=FieldValue.EDITABLE_FIELDS)
     field_value = forms.CharField(label='Значение правки')
 
     class Meta:
         model = FieldValue
-        fields = ('field_name', 'field_value', 'auth_code')
+        fields = ('field_name', 'field_value')
 
     # def clean_author_code(self):
     #     TODO: validate
         # return self.cleaned_data['author_code']
-
-
-class VoteForm(AuthCodeBase):
-    class Meta:
-        model = Vote
-        fields = ('auth_code',)
 
 
 class SendMailForm(forms.ModelForm):
