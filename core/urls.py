@@ -5,13 +5,15 @@ from views import (
     StudentDetailView,
     StudentCreateView,
     FieldValueCreateView,
-    VoteCreateView,
+    handle_vote,
     SendMailView,
+    auth_code_login,
 )
 
 
 urlpatterns = [
     url(r'^$', GradeListView.as_view(), name='grade-list'),
+    url(r'^api/login$', auth_code_login, name='api-login'),
     url(r'^(?P<grade_id>[0-9]+)/$', GradeStudentListView.as_view(),
         name='student-list'),
     url(r'^students/(?P<pk>[0-9]+)/$', StudentDetailView.as_view(),
@@ -22,7 +24,7 @@ urlpatterns = [
         name='grade-student-create'),
     url(r'^students/(?P<pk>[0-9]+)/add_value/$', FieldValueCreateView.as_view(),
         name='student-value-create'),
-    url(r'^fields/(?P<pk>[0-9]+)/(?P<vote_type>\w+)/$', VoteCreateView.as_view(),
+    url(r'^fields/(?P<pk>[0-9]+)/(?P<vote_type>\w+)/$', handle_vote,
         name='field-vote'),
     url(r'^sendmail/(?P<pk>[0-9]+)/$', SendMailView.as_view(),
         name='field-sendmail'),

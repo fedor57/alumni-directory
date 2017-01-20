@@ -6,11 +6,20 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.http import \
-    Http404, HttpResponseRedirect, HttpResponseBadRequest
+    Http404, HttpResponseRedirect, HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
 
 from models import Grade, Student, FieldValue, AuthCode, Vote
-from forms import StudentCreateForm, FieldValueForm, VoteForm, SendMailForm
+from forms import StudentCreateForm, FieldValueForm, SendMailForm
+
+
+def auth_code_login(request):
+    if request.method == 'POST':
+        request.session['auth_code'] = request.POST.get('auth_code', '')
+        return HttpResponse(request.POST.get('auth_code', ''))
+    if 'auth_code' in request.session:
+        return HttpResponse()
+    return HttpResponse(status=403)
 
 
 class GradeListView(ListView):
@@ -48,18 +57,19 @@ class StudentDetailView(DetailView):
             self.object.modifications.order_by('field_name'),
             lambda modification: modification.field_name
         )
-        context_data['grouped_modifications'] = [
+        modifications = dict(
             (field_name, list(field_values))
             for field_name, field_values
             in grouped_modifications_iterator
-        ]
-
+        )
+        context_data['grouped_modifications'] = modifications
         context_data['grade'] = self.object.main_grade
-
+        context_data['field_types'] = FieldValue.EDITABLE_FIELDS
         return context_data
 
 
 class StudentCreateView(CreateView):
+    template_name = 'core/student_form.jade'
     model = Student
     form_class = StudentCreateForm
 
@@ -82,16 +92,17 @@ class StudentCreateView(CreateView):
         self.object = form.save(commit=False)
 
         # Привязываем код авторизации и создаем для него запись в таблице кодов
-        if form.cleaned_data.get('auth_code'):
-            author_code = AuthCode.objects.get_by_code(
-                form.cleaned_data['auth_code'])
-            self.object.creator_code = author_code
+        auth_code = self.request.session.get('auth_code')
+        if auth_code:
+            author_code = AuthCode.objects.get_by_code(auth_code)
+            self.object.author_code = author_code
 
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
 
 class FieldValueCreateView(CreateView):
+    template_name = 'core/fieldvalue_form.jade'
     model = FieldValue
     form_class = FieldValueForm
 
@@ -106,9 +117,9 @@ class FieldValueCreateView(CreateView):
             return Http404()
 
         # Привязываем код авторизации и создаем для него запись в таблице кодов
-        if form.cleaned_data.get('auth_code'):
-            author_code = AuthCode.objects.get_by_code(
-                form.cleaned_data['auth_code'])
+        auth_code = self.request.session.get('auth_code')
+        if auth_code:
+            author_code = AuthCode.objects.get_by_code(auth_code)
             self.object.author_code = author_code
 
         self.object.save()
@@ -119,44 +130,37 @@ class FieldValueCreateView(CreateView):
         return reverse('student-detail', args=[str(self.kwargs['pk'])])
 
 
-class VoteCreateView(CreateView):
-    model = FieldValue
-    form_class = VoteForm
+def handle_vote(request, pk, vote_type):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+    obj = Vote()
+    
+    # Идентификатор значения FieldValue
+    try:
+        obj.field_value = FieldValue.objects.get(id=pk)
+    except FieldValue.objects.DoesNotExist:
+        return Http404()
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
+    # Тип голоса FieldValue
+    if vote_type in (Vote.VOTE_UP, Vote.VOTE_DOWN, Vote.VOTE_TO_DEL):
+        obj.value = vote_type
+    else:
+        return HttpResponseBadRequest()
 
-        # Идентификатор значения FieldValue
-        fv_id = self.kwargs.get('pk')
-        try:
-            self.object.field_value = FieldValue.objects.get(id=fv_id)
-        except FieldValue.objects.DoesNotExist:
-            return Http404()
+    # Привязываем код авторизации и создаем для него запись в таблице кодов
+    auth_code = request.session.get('auth_code')
+    if auth_code:
+        author_code = AuthCode.objects.get_by_code(auth_code)
+        obj.author_code = author_code
 
-        # Тип голоса FieldValue
-        vote_type = self.kwargs.get('vote_type')
-        if vote_type in (Vote.VOTE_UP, Vote.VOTE_DOWN, Vote.VOTE_TO_DEL):
-            self.object.value = vote_type
-        else:
-            return HttpResponseBadRequest()
-
-        # Привязываем код авторизации и создаем для него запись в таблице кодов
-        if form.cleaned_data.get('auth_code'):
-            author_code = AuthCode.objects.get_by_code(
-                form.cleaned_data['auth_code'])
-            self.object.author_code = author_code
-
-        self.object.save()
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('student-detail', kwargs={
-            'pk': str(self.object.field_value.target_id)
-        })
+    obj.save()
+    return HttpResponseRedirect(
+        reverse('student-detail', kwargs={
+            'pk': str(obj.field_value.target_id)}))
 
 
 class SendMailView(CreateView):
-    template_name = 'core/sendmail_form.html'
+    template_name = 'core/sendmail_form.jade'
     model = FieldValue
     form_class = SendMailForm
 
