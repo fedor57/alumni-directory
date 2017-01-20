@@ -157,12 +157,12 @@ class FieldValue(Timestamped):
         verbose_name_plural = 'правки'
 
     def save(self, *args, **kwargs):
-        # Проверяем уникальность ('target', 'author', 'field_name')
-        if self.author_code_id and not self.pk and FieldValue.objects.filter(
+        # Проверяем уникальность ('target', 'field_value', 'field_name')
+        if not self.pk and FieldValue.objects.filter(
                 target=self.target_id,
-                author_code=self.author_code_id,
+                field_value=self.field_value,
                 field_name=self.field_name).exists():
-            raise ValueError('Dublicate value')
+            return  # Недобавляем повторящиеся значение
         super(FieldValue, self).save(*args, **kwargs)
 
     def __unicode__(self):
