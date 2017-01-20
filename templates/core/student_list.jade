@@ -6,15 +6,32 @@ block nav
     li.active
         a Класс "{{ grade.letter }}" выпуск {{ grade.graduation_year }} года
 
+block scripts
+    :coffeescript
+        $ ->
+            modal = $ '#student-modal'
+            students = $ '#students'
+            students.on 'click', '.student', (e) ->
+                astudent = $ e.target
+                url = astudent.data 'href'
+                modal.find('.modal-body').load url
+                modal.modal('show')
+
 block content
     h1
         | Список выпускников класса "{{ grade.letter }}"
         | {{ grade.graduation_year }} года выпуска:
 
-    ul
+    #student-modal.modal.fade(tabindex='-1', role='dialog')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-body
+
+    ul#students
         - for student in object_list
             li
-                a(href="{% url 'student-detail' pk=student.id %}") {{ student.name }}
+                a.student(data-href="{% url 'student-detail' pk=student.id %}")
+                    | {{ student.name }}
 
             - empty
                 li Пусто.

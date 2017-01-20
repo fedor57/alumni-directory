@@ -1,0 +1,44 @@
+style.
+    .field-trusted {}
+    .field-untrusted {color: #aaa;}
+    .field-hidden {color: #eee;}
+
+h1 {{ object.name }}
+
+- for field, modifications in grouped_modifications
+    h3 {{ modifications.0.get_field_name_display }}
+
+    ul
+        - for modification in modifications
+            li(class="
+                {% if modification.status == 'trusted' %}field-trusted{% else %}
+                    {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
+                {% endif %}")
+                - if modification.field_name == 'social_vk'
+                    a(href="{{ modification.field_value }}")
+                        | {{ modification.field_value }}
+                - elif modification.field_name == 'social_fb'
+                    a(href="{{ modification.field_value }}")
+                        | {{ modification.field_value }}
+                - elif modification.field_name == 'link'
+                    a(href="{{ modification.field_value }}")
+                        | {{ modification.field_value }}
+                - elif modification.field_name == 'email'
+                    a(href="{% url 'field-sendmail' pk=modification.pk %}")
+                        | Отправить сообщение
+                - else
+                    {{ modification.field_value }}
+                - if modification.field_name != 'email'
+                    | &nbsp
+                    a(href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}")
+                        span.glyphicon.glyphicon-ok-circle
+                    | &nbsp
+                    a(href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}")
+                        span.glyphicon.glyphicon-remove-circle
+                    | &nbsp
+                    a(href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
+                        span.glyphicon.glyphicon-ban-circle
+
+p
+    a.btn.btn-default(href="{% url 'student-value-create' pk=object.pk %}")
+        | Добавить значение

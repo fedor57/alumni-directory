@@ -38,6 +38,7 @@ class GradeStudentListView(ListView):
 
 
 class StudentDetailView(DetailView):
+    template_name = 'core/student_detail.jade'
     model = Student
 
     def get_context_data(self, **kwargs):
