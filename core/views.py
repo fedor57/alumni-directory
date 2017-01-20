@@ -54,6 +54,8 @@ class StudentDetailView(DetailView):
             in grouped_modifications_iterator
         ]
 
+        context_data['grade'] = self.object.main_grade
+
         return context_data
 
 

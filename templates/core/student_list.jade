@@ -13,8 +13,10 @@ block scripts
             students = $ '#students'
             students.on 'click', '.student', (e) ->
                 astudent = $ e.target
+                if not astudent.hasClass 'student'
+                    astudent = astudent.parents '.student'
                 url = astudent.data 'href'
-                modal.find('.modal-body').load url
+                modal.find('.modal-content').load url + ' #main-content > *'
                 modal.modal('show')
 
 block content
@@ -25,13 +27,15 @@ block content
     #student-modal.modal.fade(tabindex='-1', role='dialog')
       .modal-dialog(role='document')
         .modal-content
-          .modal-body
 
     ul#students
         - for student in object_list
             li
-                a.student(data-href="{% url 'student-detail' pk=student.id %}")
+                a(href="{% url 'student-detail' pk=student.id %}")
                     | {{ student.name }}
+                | &nbsp;
+                a.student(data-href="{% url 'student-detail' pk=student.id %}")
+                    span.glyphicon.glyphicon-new-window
 
             - empty
                 li Пусто.

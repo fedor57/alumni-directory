@@ -1,15 +1,47 @@
-style.
-    .field-trusted {}
-    .field-untrusted {color: #aaa;}
-    .field-hidden {color: #eee;}
+extends 'core/base.html'
 
-h1 {{ object.name }}
+block nav
+    li
+        a(href="/") Список классов
+    li
+        a(href="{% url 'student-list' grade_id=grade.pk %}")
+            | Класс "{{ grade.letter }}" выпуск {{ grade.graduation_year }} года
+    li.active
+        a {{ object.name }}
 
-- for field, modifications in grouped_modifications
-    h3 {{ modifications.0.get_field_name_display }}
+block scripts
+  style.
+    .modal-body .close {display: none;}
+    .modal-footer .btn-cls {display: none;}
 
-    ul
-        - for modification in modifications
+block content
+  .modal-body
+    button.close(type='button', data-dismiss='modal', aria-label='Close')
+      span(aria-hidden='true') ×
+
+    ul.nav.nav-tabs
+      li.active(role='presentation')
+        a {{ object.name }}
+      li(role='presentation')
+        a(href='#') Город
+      li(role='presentation')
+        a(href='#') Написать
+      li(role='presentation')
+        a(href='#') Facebook
+      li(role='presentation')
+        a(href='#') ВКонтакте
+
+    .container
+      style.
+        .field-trusted {}
+        .field-untrusted {color: #aaa;}
+        .field-hidden {color: #eee;}
+
+      - for field, modifications in grouped_modifications
+        p {{ modifications.0.get_field_name_display }}
+
+        ul
+          - for modification in modifications
             li(class="
                 {% if modification.status == 'trusted' %}field-trusted{% else %}
                     {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
@@ -39,6 +71,8 @@ h1 {{ object.name }}
                     a(href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
                         span.glyphicon.glyphicon-ban-circle
 
-p
-    a.btn.btn-default(href="{% url 'student-value-create' pk=object.pk %}")
-        | Добавить значение
+  .modal-footer
+    button.btn.btn-default(
+      type='button',
+      data-href="{% url 'student-value-create' pk=object.pk %}") Добавить факт
+    button.btn.btn-cls.btn-primary(type='button', data-dismiss='modal') Закрыть
