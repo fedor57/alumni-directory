@@ -60,8 +60,7 @@ block content
                     a(href="{{ modification.field_value }}")
                         | {{ modification.field_value }}
                 - elif modification.field_name == 'email'
-                    a(href="{% url 'field-sendmail' pk=modification.pk %}")
-                        | Отправить сообщение
+                    a e-mail скрыт
                 - else
                     {{ modification.field_value }}
                 - if modification.field_name != 'email'
