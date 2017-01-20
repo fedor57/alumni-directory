@@ -1,0 +1,35 @@
+#modal-login.modal.fade(tabindex='-1', role='dialog')
+  .modal-dialog(role='document')
+    .modal-content
+      .modal-header
+        button.close(type='button', data-dismiss='modal', aria-label='Close')
+          span(aria-hidden='true') ×
+        h4.modal-title Авторизация
+      .modal-body
+        form(action="{% url 'api-login' %}", method="post")
+          - csrf_token
+          .form-group
+            label Код аутентификации
+            input.form-control(name='auth_code', type='text', required='required', value='{{ request.session.auth_code|default:"" }}')
+      .modal-footer
+        button.btn.btn-default(type='button', data-dismiss='modal') Закрыть
+        button#btn-login.btn.btn-primary(type='button') Войти
+        button#btn-anon.btn.btn-default(type='button') Анонимно
+
+:coffeescript
+    $ ->
+        modal = $('#modal-login')
+        form = modal.find 'form'
+        
+        sendForm = ->
+            $.post form.prop('action'), form.serialize(), (data) ->
+                if not data.length
+                    data = 'Вход'
+                $('#btn-login').text(data)
+                modal.modal 'hide'
+        
+        modal.on 'click', '#btn-login', sendForm
+
+        modal.on 'click', '#btn-anon', ->
+            form.find('[name="auth_code"]').val('')
+            sendForm()
