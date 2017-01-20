@@ -1,0 +1,13 @@
+:coffeescript
+  $ ->
+    click_vote = (e) ->
+      t = $ e.target
+      if not t.hasClass '.btn-vote'
+        t = t.parents '.btn-vote'
+      url = t.data 'href'
+      t = t.parents '.vote-panel'
+      csrftoken = getCookie 'csrftoken'
+      $.post url, 'csrfmiddlewaretoken=' + csrftoken, ->
+        t.html '<span class="glyphicon glyphicon-ok"></span>'
+    $('#tab-student').on 'click', '.btn-vote', click_vote
+    $('#student-modal').on 'click', '.btn-vote', click_vote

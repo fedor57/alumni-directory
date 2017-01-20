@@ -13,36 +13,40 @@ block scripts
   style.
     .modal-body .close {display: none;}
     .modal-footer .btn-cls {display: none;}
+  include core/include_vote
 
 block content
   .modal-body
     button.close(type='button', data-dismiss='modal', aria-label='Close')
       span(aria-hidden='true') ×
 
-    ul.nav.nav-tabs
+    ul.nav.nav-tabs#tabs-student(role='tablist')
       li.active(role='presentation')
-        a {{ object.name }}
+        a(href='#tab-student', aria-controls='tab-student', role='tab', data-toggle='tab') {{ object.name }}
       li(role='presentation')
-        a(href='#') Город
+        a(href='#tab-send', aria-controls='tab-send', role='tab', data-toggle='tab') Написать
       li(role='presentation')
-        a(href='#') Написать
+        a(href='#tab-fb', aria-controls='tab-fb', role='tab', data-toggle='tab') Facebook
       li(role='presentation')
-        a(href='#') Facebook
+        a(href='#tab-vk', aria-controls='tab-vk', role='tab', data-toggle='tab') ВКонтакте
       li(role='presentation')
-        a(href='#') ВКонтакте
+        a(href='#tab-add', aria-controls='tab-add', role='tab', data-toggle='tab') Добавить
 
-    .container
-      style.
+    style.
         .field-trusted {}
         .field-untrusted {color: #aaa;}
         .field-hidden {color: #eee;}
+        .btn-vote {cursor: pointer;}
 
-      - for field, modifications in grouped_modifications
-        p {{ modifications.0.get_field_name_display }}
+    .tab-content
+      #tab-student.tab-pane.active(role='tabpanel')
+        br
+        - for field, modifications in grouped_modifications.items
+          p {{ modifications.0.get_field_name_display }}
 
-        ul
-          - for modification in modifications
-            li(class="
+          ul
+            - for modification in modifications
+              li(class="
                 {% if modification.status == 'trusted' %}field-trusted{% else %}
                     {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
                 {% endif %}")
@@ -61,18 +65,43 @@ block content
                 - else
                     {{ modification.field_value }}
                 - if modification.field_name != 'email'
+                  span.vote-panel
                     | &nbsp
-                    a(href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}")
-                        span.glyphicon.glyphicon-ok-circle
+                    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}")
+                      span.glyphicon.glyphicon-ok-circle
                     | &nbsp
-                    a(href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}")
-                        span.glyphicon.glyphicon-remove-circle
+                    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}")
+                      span.glyphicon.glyphicon-remove-circle
                     | &nbsp
-                    a(href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
-                        span.glyphicon.glyphicon-ban-circle
+                    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
+                      span.glyphicon.glyphicon-ban-circle
+
+      #tab-send.tab-pane(role='tabpanel')
+        br
+        - if 'email' in grouped_modifications
+          - with field_email=grouped_modifications.email.0
+            include core/sendmail_form
+        - else
+          | Нет данных о e-mail
+      #tab-fb.tab-pane(role='tabpanel')
+        br
+        - if 'social_fb' in grouped_modifications
+          - with modification=grouped_modifications.social_vk
+            a(href="{{ modification.field_value }}")
+              | {{ modification.field_value }}
+        - else
+          | Нет данных о социальной сети
+      #tab-vk.tab-pane(role='tabpanel')
+        br
+        - if 'social_vk' in grouped_modifications
+          - with modification=grouped_modifications.social_vk
+            a(href="{{ modification.field_value }}")
+              | {{ modification.field_value }}
+        - else
+          | Нет данных о социальной сети
+      #tab-add.tab-pane(role='tabpanel')
+        br
+        include core/fieldvalue_form
 
   .modal-footer
-    button.btn.btn-default(
-      type='button',
-      data-href="{% url 'student-value-create' pk=object.pk %}") Добавить факт
     button.btn.btn-cls.btn-primary(type='button', data-dismiss='modal') Закрыть

@@ -53,15 +53,18 @@
             <button type="submit" class="btn btn-default">Поиск</button>
           </form>
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Вход</a></li>
+            <li><a id="btn-login" href="#" data-toggle="modal" data-target="#modal-login">
+                {% if request.session.auth_code %}
+                    {{ request.session.auth_code }}
+                {% else %}
+                    Вход
+                {% endif %}
+                </a>
+            </li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>
-
-      <div id="main-content" class="container">
-        {% block content %}{% endblock %}
-      </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -69,7 +72,30 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
             crossorigin="anonymous"></script>
+    <script>
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+
+    {% include "core/login.jade" %}
+
+      <div id="main-content" class="container">
+        {% block content %}{% endblock %}
+      </div>
 
     {% block scripts %}{% endblock %}
+
   </body>
 </html>
