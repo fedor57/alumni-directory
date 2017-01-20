@@ -158,11 +158,11 @@ class FieldValue(Timestamped):
 
     def save(self, *args, **kwargs):
         # Проверяем уникальность ('target', 'author', 'field_name')
-        if self.author_code_id and FieldValue.objects.filter(
+        if self.author_code_id and not self.pk and FieldValue.objects.filter(
                 target=self.target_id,
                 author_code=self.author_code_id,
                 field_name=self.field_name).exists():
-            raise ValueError('Повтор значения')
+            raise ValueError('Dublicate value')
         super(FieldValue, self).save(*args, **kwargs)
 
     def __unicode__(self):
