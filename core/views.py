@@ -137,11 +137,15 @@ class FieldValueCreateView(CreateView):
         # Привязываем код авторизации и создаем для него запись в таблице кодов
         auth_code = self.request.session.get('auth_code')
         if auth_code:
-            author_code = AuthCode.objects.get_by_code(auth_code)
-            self.object.author_code = author_code
+            auth_code = AuthCode.objects.get_by_code(auth_code)
+            self.object.author_code = auth_code
 
         self.object.save()
-
+        vote = Vote(field_value=self.object,
+                    value=Vote.VOTE_ADDED)
+        if auth_code:
+            vote.author_code = auth_code
+        vote.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
