@@ -2,6 +2,7 @@
 import itertools
 
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
@@ -44,6 +45,23 @@ class GradeStudentListView(ListView):
         context_data = super(GradeStudentListView, self).get_context_data(**kwargs)
         context_data['grade'] = Grade.objects.get(id=self.kwargs.get('grade_id'))
         return context_data
+
+
+class SearchStudentListView(ListView):
+    template_name = 'core/search_list.jade'
+    model = Student
+
+    def get_queryset(self):
+        query = self.request.GET.get('query')
+        qs = super(SearchStudentListView, self).get_queryset()
+        if query:
+            q = Q(modifications__field_value__icontains=query)
+            q &= ~Q(modifications__status=FieldValue.STATUS_DELETED)
+            q |= Q(name__icontains=query)
+            qs = qs.filter(q).distinct()[:100]
+        else:
+            qs = qs.none()
+        return qs
 
 
 class StudentDetailView(DetailView):

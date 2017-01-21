@@ -1,0 +1,25 @@
+extends core/student_list
+
+block nav
+    li
+        a(href="/") Список классов
+    li.active
+        a Поиск
+
+block content
+
+    #student-modal.modal.fade(tabindex='-1', role='dialog')
+      .modal-dialog.modal-lg(role='document')
+        .modal-content
+
+    ul#students
+        - for student in object_list
+            li
+                a(href="{% url 'student-detail' pk=student.id %}")
+                    | {{ student.name }} {{ student.main_grade }}
+                | &nbsp;
+                a.student(data-href="{% url 'student-detail' pk=student.id %}")
+                    span.glyphicon.glyphicon-new-window
+
+            - empty
+                li Ничего не найдено
