@@ -28,9 +28,17 @@ class GradeListView(ListView):
     template_name = 'core/grade_list.jade'
 
 
-class GradeStudentListView(ListView):
-    template_name = 'core/student_list.jade'
+class BaseStudentListView(ListView):
     model = Student
+
+    def get_queryset(self):
+        qs = super(BaseStudentListView, self).get_queryset()
+        qs = qs.prefetch_related('modifications')
+        return qs
+
+
+class GradeStudentListView(BaseStudentListView):
+    template_name = 'core/student_list.jade'
 
     def get(self, request, *args, **kwargs):
         if not Grade.objects.filter(id=self.kwargs.get('grade_id')).exists():
@@ -58,7 +66,8 @@ class SearchStudentListView(ListView):
             q = Q(modifications__field_value__icontains=query)
             q &= ~Q(modifications__status=FieldValue.STATUS_DELETED)
             q |= Q(name__icontains=query)
-            qs = qs.filter(q).distinct()[:100]
+            qs = qs.prefetch_related('main_grade')
+            qs = qs.filter(q).distinct()[:30]
         else:
             qs = qs.none()
         return qs
