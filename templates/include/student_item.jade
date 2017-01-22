@@ -1,0 +1,24 @@
+a(href="{% url 'student-detail' pk=student.id %}")
+    | {{ student.name }}
+    - for name in student.ordered_facts.name
+        |  ({{ name.field_value }})
+
+| &nbsp;
+a.student(data-href="{% url 'student-detail' pk=student.id %}")
+    span.glyphicon.glyphicon-new-window &nbsp;
+
+- if not grade
+    | &nbsp;
+    a(href="{% url 'student-list' grade_id=student.main_grade.pk %}")
+        span.label.label-default {{ student.main_grade }}
+
+- for name, modifications in student.ordered_facts.items
+  - if name in 'city company'
+    - for modif in modifications
+      - if modif.status == 'trusted' and modif.field_name != 'email'
+        | &nbsp;
+        a(href="{% url 'search-list' %}?query={{ modif.field_value }}")
+          - if modif.field_name == 'city'
+            span.label.label-warning {{ modif.field_value }}
+          - else
+            span.label.label-info {{ modif.field_value }}

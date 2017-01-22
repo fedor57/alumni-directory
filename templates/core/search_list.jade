@@ -15,11 +15,7 @@ block content
     ul#students
         - for student in object_list
             li
-                a(href="{% url 'student-detail' pk=student.id %}")
-                    | {{ student.name }} {{ student.main_grade }}
-                | &nbsp;
-                a.student(data-href="{% url 'student-detail' pk=student.id %}")
-                    span.glyphicon.glyphicon-new-window
+                include include/student_item
 
             - empty
                 li Ничего не найдено
