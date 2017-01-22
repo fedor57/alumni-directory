@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-from collections import Counter
+from collections import Counter, OrderedDict
 
 from django.core.validators import RegexValidator
 from django.db import models
@@ -9,6 +9,7 @@ from django.db.models.aggregates import Count
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 
 class Timestamped(models.Model):
@@ -93,6 +94,16 @@ class Student(Timestamped):
 
     def get_absolute_url(self):
         return reverse('student-detail', args=[str(self.id)])
+
+    @cached_property
+    def ordered_facts(self):
+        result = OrderedDict()
+        for name, text in FieldValue.EDITABLE_FIELDS:
+            result[name] = []
+        ms = self.modifications.all()
+        for m in ms:
+            result[m.field_name].append(m)
+        return result
 
 
 class FieldValueManager(models.Manager):
