@@ -1,5 +1,11 @@
 extends 'core/base.html'
 
+block nav
+    {{ block.super }}
+    li
+        a(href="{% url 'student-create' %}")
+            | Добавить выпускника
+
 block content
 
     h1 Список классов:
@@ -11,6 +17,3 @@ block content
                     | {{ grade.graduation_year }} ({{ grade.letter }})
             - empty
                 li Пусто.
-
-    p
-        a.btn.btn-default(href="{% url 'student-create' %}") Добавить выпускника

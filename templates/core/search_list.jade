@@ -5,6 +5,9 @@ block nav
         a(href="/") Список классов
     li.active
         a Поиск
+    li
+        a(href="{% url 'student-create' %}")
+            | Добавить выпускника
 
 block content
 

@@ -5,6 +5,9 @@ block nav
         a(href="/") Список классов
     li.active
         a Класс "{{ grade.letter }}" выпуск {{ grade.graduation_year }} года
+    li
+        a(href="{% url 'grade-student-create' grade_id=grade.id %}")
+            | Добавить выпускника
 
 block scripts
     :coffeescript
@@ -36,7 +39,3 @@ block content
 
             - empty
                 li Пусто.
-
-    p
-        a.btn.btn-default(href="{% url 'grade-student-create' grade_id=grade.id %}")
-            | Добавить выпускника
