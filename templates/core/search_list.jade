@@ -1,4 +1,5 @@
 extends core/student_list
+- load bootstrap3
 
 block nav
     li
@@ -22,3 +23,5 @@ block content
 
             - empty
                 li Ничего не найдено
+
+    - bootstrap_pagination page_obj url=request.get_full_path

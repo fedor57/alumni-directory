@@ -10,8 +10,8 @@ from django.http import \
     Http404, HttpResponseRedirect, HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
 
-from models import Grade, Student, FieldValue, AuthCode, Vote
-from forms import StudentCreateForm, FieldValueForm, SendMailForm
+from .models import Grade, Student, FieldValue, AuthCode, Vote
+from .forms import StudentCreateForm, FieldValueForm, SendMailForm
 
 
 def auth_code_login(request):
@@ -55,9 +55,9 @@ class GradeStudentListView(BaseStudentListView):
         return context_data
 
 
-class SearchStudentListView(ListView):
+class SearchStudentListView(BaseStudentListView):
     template_name = 'core/search_list.jade'
-    model = Student
+    paginate_by = 10
 
     def get_queryset(self):
         query = self.request.GET.get('query')
@@ -67,7 +67,7 @@ class SearchStudentListView(ListView):
             q &= ~Q(modifications__status=FieldValue.STATUS_DELETED)
             q |= Q(name__icontains=query)
             qs = qs.prefetch_related('main_grade')
-            qs = qs.filter(q).distinct()[:30]
+            qs = qs.filter(q).distinct()
         else:
             qs = qs.none()
         return qs

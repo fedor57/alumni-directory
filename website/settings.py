@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'bootstrap3',
 ]
 
 MIDDLEWARE = [
@@ -136,5 +137,5 @@ STATIC_ROOT = os.path.join(ROOT, 'static')
 # Respect local_settings file
 try:
     from website.local_settings import *
-except ImportError, exp:
-    print 'Can\'t find local settings, use defaults'
+except ImportError as exp:
+    print('Can\'t find local settings, use defaults')
