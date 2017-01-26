@@ -19,7 +19,14 @@ block scripts
                 if not astudent.hasClass 'student'
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
-                modal.find('.modal-content').load url + ' #main-content > *'
+                modal.find('.modal-content').load url + ' #main-content > *', ->
+                    suggest = modal.find '.suggest'
+                    url = '{% url "suggest-list" %}'
+                    suggest.typeahead
+                      source: (query, process) ->
+                        $.get url + '?query=' + query, (data) ->
+                          process data.data
+                      matcher: -> true
                 modal.modal('show')
     include core/include_vote
 

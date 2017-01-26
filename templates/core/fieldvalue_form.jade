@@ -8,5 +8,6 @@ form(action="{% url 'student-value-create' pk=object.pk %}", method="post")
         option(value='{{ val }}') {{ descr }}
   .form-group
     label Значение
-    input.form-control(name='field_value', type='text', required='required')
+    input.suggest.form-control(name='field_value', type='text',
+                               required='required')
   button.btn.btn-default(type='submit') Добавить факт
