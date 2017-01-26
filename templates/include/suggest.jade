@@ -7,3 +7,9 @@
         $.get url + '?students=1&query=' + query, (data) ->
           process data.data
       matcher: -> true
+
+    $('.suggest').typeahead
+      source: (query, process) ->
+        $.get url + '?query=' + query, (data) ->
+          process data.data
+      matcher: -> true
