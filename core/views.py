@@ -1,8 +1,10 @@
 # coding=utf-8
 import itertools
+import operator
 
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.http import JsonResponse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
@@ -57,7 +59,7 @@ class GradeStudentListView(BaseStudentListView):
 
 class SearchStudentListView(BaseStudentListView):
     template_name = 'core/search_list.jade'
-    paginate_by = 10
+    paginate_by = 25
 
     def get_queryset(self):
         query = self.request.GET.get('query')
@@ -71,6 +73,60 @@ class SearchStudentListView(BaseStudentListView):
         else:
             qs = qs.none()
         return qs
+
+
+class SuggestListView(ListView):
+    model = FieldValue
+
+    def get_queryset(self):
+        query = self.request.GET.get('query', '')
+        self.query = query.split()
+
+        qs = super(SuggestListView, self).get_queryset()
+
+        if self.query:
+            qu = [
+                ~Q(status=FieldValue.STATUS_DELETED),
+                ~Q(field_name=FieldValue.FIELD_EMAIL),
+                ~Q(field_name=FieldValue.FIELD_SOCIAL_FB),
+                ~Q(field_name=FieldValue.FIELD_SOCIAL_VK),
+            ]
+
+            for q in self.query:
+                qu.append(Q(field_value__icontains=q))
+
+            qu = reduce(operator.and_, qu)
+
+            qs = qs.filter(qu) \
+                .values_list('field_value', flat=True) \
+                .distinct()
+        else:
+            qs = qs.none()
+
+        return qs
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.query:
+            data = list(context['object_list'])
+        else:
+            data = []
+
+        if self.query and self.request.GET.get('students') in ('1', 'true'):
+            qu = []
+
+            for q in self.query:
+                qu.append(Q(name__icontains=q))
+
+            qu = reduce(operator.and_, qu)
+
+            qs = Student.objects.filter(qu) \
+                .values_list('name', flat=True) \
+                .distinct()[:30]
+
+            data = list(qs) + data
+        return JsonResponse({
+            'data': data,
+        })
 
 
 class StudentDetailView(DetailView):
