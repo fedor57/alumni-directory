@@ -1,0 +1,9 @@
+:coffeescript
+  $ ->
+    suggest = $ '.suggest-students'
+    url = '{% url "suggest-list" %}'
+    suggest.typeahead
+      source: (query, process) ->
+        $.get url + '?students=1&query=' + query, (data) ->
+          process data.data
+      matcher: -> true
