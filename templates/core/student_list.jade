@@ -10,6 +10,20 @@ block nav
             | Добавить выпускника
 
 block scripts
+    style.
+      .value-badge {
+        background: #eee;
+        color: #777;
+        padding: 2px 5px;
+        border-radius: 5px;
+        margin: 2px 3px;
+      }
+      .value-untrusted {
+        font-style: italic;
+      }
+      .students-list li {
+        margin-top: 9px;
+      }
     :coffeescript
         $ ->
             modal = $ '#student-modal'
@@ -39,7 +53,7 @@ block content
       .modal-dialog.modal-lg(role='document')
         .modal-content
 
-    ul#students
+    ul#students.students-list
         - for student in object_list
             li
                 include include/student_item

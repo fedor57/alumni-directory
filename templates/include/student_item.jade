@@ -8,17 +8,34 @@ a.student(data-href="{% url 'student-detail' pk=student.id %}")
     span.glyphicon.glyphicon-new-window &nbsp;
 
 - if not grade
-    | &nbsp;
     a(href="{% url 'student-list' grade_id=student.main_grade.pk %}")
-        span.label.label-default {{ student.main_grade }}
+        span.value-badge {{ student.main_grade }}
 
 - for name, modifications in student.ordered_facts.items
-  - if name in 'city company'
-    - for modif in modifications
-      - if modif.status == 'trusted' and modif.field_name != 'email'
-        | &nbsp;
-        a(href="{% url 'search-list' %}?query={{ modif.field_value }}")
-          - if modif.field_name == 'city'
-            span.label.label-warning {{ modif.field_value }}
-          - else
-            span.label.label-info {{ modif.field_value }}
+  - for modif in modifications
+    - if modif.status in 'trusted untrusted'
+
+      - if modif.field_name == 'city'
+        a(href="{% url 'search-list' %}?query={{ modif.field_value }}",
+            data-toggle="tooltip", data-placement="top", title="Город")
+          span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
+
+      - elif modif.field_name == 'company'
+        a(href="{% url 'search-list' %}?query={{ modif.field_value }}",
+            data-toggle="tooltip", data-placement="top", title="Компания/ВУЗ")
+          span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
+
+      - elif name == 'link'
+        a(href="{{ modif.field_value }}")
+          span.value-badge(class="value-{{ modif.status }}")
+            | {{ modif.field_value }}
+
+      - elif name == 'social_fb'
+        a(href="{{ modif.field_value }}",
+            data-toggle="tooltip", data-placement="top", title="facebook")
+          span.value-badge(class="value-{{ modif.status }}") fb
+
+      - elif name == 'social_vk'
+        a(href="{{ modif.field_value }}",
+            data-toggle="tooltip", data-placement="top", title="ВКонтакте")
+          span.value-badge(class="value-{{ modif.status }}") vk
