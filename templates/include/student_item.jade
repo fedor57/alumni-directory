@@ -4,7 +4,7 @@ a(href="{% url 'student-detail' pk=student.id %}")
         |  ({{ name.field_value }})
 
 | &nbsp;
-a.student(data-href="{% url 'student-detail' pk=student.id %}")
+a.student-window
     span.glyphicon.glyphicon-new-window &nbsp;
 
 - if not grade
@@ -14,6 +14,9 @@ a.student(data-href="{% url 'student-detail' pk=student.id %}")
 - for name, modifications in student.ordered_facts.items
   - for modif in modifications
     - if modif.status in 'trusted untrusted'
+
+      - if modif.field_name == 'email'
+        span.student-email.value-badge(class="value-{{ modif.status }}") @
 
       - if modif.field_name == 'city'
         a(href="{% url 'search-list' %}?query={{ modif.field_value }}",

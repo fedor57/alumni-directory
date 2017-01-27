@@ -24,16 +24,19 @@ block scripts
       .students-list li {
         margin-top: 9px;
       }
+      .student-email {cursor: pointer;}
     :coffeescript
         $ ->
             modal = $ '#student-modal'
             students = $ '#students'
-            students.on 'click', '.student', (e) ->
+            students.on 'click', '.student-window', (e) ->
+                e.preventDefault()
                 astudent = $ e.target
                 if not astudent.hasClass 'student'
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
                 modal.find('.modal-content').load url + ' #main-content > *', ->
+                    modal.modal('show')
                     suggest = modal.find '.suggest'
                     url = '{% url "suggest-list" %}'
                     suggest.typeahead
@@ -41,7 +44,20 @@ block scripts
                         $.get url + '?query=' + query, (data) ->
                           process data.data
                       matcher: -> true
-                modal.modal('show')
+
+            students.on 'click', '.student-email', (e) ->
+                e.preventDefault()
+                astudent = $ e.target
+                if not astudent.hasClass 'student'
+                    astudent = astudent.parents '.student'
+                url = astudent.data 'href'
+                modal_body = $ '<div class="modal-body">'
+                mc = modal.find('.modal-content')
+                mc.html ''
+                mc.append modal_body
+                modal_body.load url + ' #tab-send', ->
+                    modal.modal('show')
+
     include core/include_vote
 
 block content
@@ -55,7 +71,7 @@ block content
 
     ul#students.students-list
         - for student in object_list
-            li
+            li.student(data-href="{% url 'student-detail' pk=student.id %}")
                 include include/student_item
 
             - empty

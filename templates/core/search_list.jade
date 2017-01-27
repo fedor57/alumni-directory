@@ -18,7 +18,7 @@ block content
 
     ul#students
         - for student in object_list
-            li
+            li.student(data-href="{% url 'student-detail' pk=student.id %}")
                 include include/student_item
 
             - empty
