@@ -3,9 +3,9 @@ form#sendmail(action="{% url 'field-sendmail' pk=field_email.pk %}", method="pos
   - csrf_token
   .form-group
     label Тема сообщения
-    input.form-control(name='subject', type='text', placeholder='')
+    input.form-control(name='subject', type='text', placeholder='', required='required')
   .form-group
     label Тело сообщения
-    textarea.form-control(name='message', rows="5")
+    textarea.form-control(name='message', rows="5", required='required')
 
   button.btn.btn-default(type='submit') Отправить
