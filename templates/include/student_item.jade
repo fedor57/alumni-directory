@@ -18,7 +18,7 @@ a.student-window
       - if modif.field_name == 'email'
         span.student-email.value-badge(class="value-{{ modif.status }}") @
 
-      - if modif.field_name == 'city'
+      - elif modif.field_name == 'city'
         a(href="{% url 'search-list' %}?query={{ modif.field_value }}",
             data-toggle="tooltip", data-placement="top", title="Город")
           span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
