@@ -1,6 +1,9 @@
 :coffeescript
   $ ->
     click_vote = (e) ->
+      if check_login()
+        return
+
       t = $ e.target
       if not t.hasClass '.btn-vote'
         t = t.parents '.btn-vote'
