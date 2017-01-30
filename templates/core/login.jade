@@ -20,14 +20,26 @@
     $ ->
         modal = $('#modal-login')
         form = modal.find 'form'
-        
+        key_auth = 'is_auth'
+        auth_code = '{{ request.session.auth_code|default:"" }}'
+
+        window.check_login = ->
+            sess = sessionStorage.getItem key_auth
+            if !sess and auth_code.length == 0
+                modal.css 'z-index', 2000
+                modal.modal 'show'
+                return true
+            return false
+        check_login()
+
         sendForm = ->
             $.post form.prop('action'), form.serialize(), (data) ->
                 if not data.length
                     data = 'Вход'
                 $('#btn-login').text(data)
+                sessionStorage.setItem key_auth, true
                 modal.modal 'hide'
-        
+
         modal.on 'click', '#btn-login', sendForm
 
         modal.on 'click', '#btn-anon', ->
