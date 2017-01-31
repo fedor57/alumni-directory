@@ -16,6 +16,9 @@ block content
       .modal-dialog.modal-lg(role='document')
         .modal-content
 
+    nav#student-nav.navbar.navbar-default.navbar-fixed-bottom(style="height: 310px;")
+      .container(style="height: 100%;")
+
     ul#students
         - for student in object_list
             li.student(data-href="{% url 'student-detail' pk=student.id %}")
@@ -25,3 +28,5 @@ block content
                 li Ничего не найдено
 
     - bootstrap_pagination page_obj url=request.get_full_path
+
+    .students-bottom

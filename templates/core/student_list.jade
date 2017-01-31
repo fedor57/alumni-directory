@@ -11,6 +11,8 @@ block nav
 
 block scripts
     style.
+      .modal-body .close {display: none;}
+      .modal-footer .btn-cls {display: none;}
       .value-badge {
         background: #eee;
         color: #777;
@@ -24,10 +26,19 @@ block scripts
       .students-list li {
         margin-top: 9px;
       }
-      .student-email {cursor: pointer;}
+      .students-bottom {
+        padding-bottom: 350px;
+      }
+      .student-email, .student-window {cursor: pointer;}
+      #tab-student {
+        overflow-y: auto;
+        height: 200px;
+      }
     :coffeescript
         $ ->
             modal = $ '#student-modal'
+            nav = $ '#student-nav'
+            nav.hide()
             students = $ '#students'
             students.on 'click', '.student-window', (e) ->
                 e.preventDefault()
@@ -35,9 +46,9 @@ block scripts
                 if not astudent.hasClass 'student'
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
-                modal.find('.modal-content').load url + ' #main-content > *', ->
-                    modal.modal('show')
-                    suggest = modal.find '.suggest'
+                nav.load url + ' #main-content > *', ->
+                    nav.slideDown()
+                    suggest = nav.find '.suggest'
                     url = '{% url "suggest-list" %}'
                     suggest.typeahead
                       source: (query, process) ->
@@ -69,6 +80,9 @@ block content
       .modal-dialog.modal-lg(role='document')
         .modal-content
 
+    nav#student-nav.navbar.navbar-default.navbar-fixed-bottom(style="height: 310px;")
+      .container(style="height: 100%;")
+
     ul#students.students-list
         - for student in object_list
             li.student(data-href="{% url 'student-detail' pk=student.id %}")
@@ -76,3 +90,5 @@ block content
 
             - empty
                 li Пусто.
+
+    .students-bottom

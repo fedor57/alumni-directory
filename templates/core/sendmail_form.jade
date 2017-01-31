@@ -6,6 +6,6 @@ form#sendmail(action="{% url 'field-sendmail' pk=field_email.pk %}", method="pos
     input.form-control(name='subject', type='text', placeholder='', required='required')
   .form-group
     label Тело сообщения
-    textarea.form-control(name='message', rows="5", required='required')
+    textarea.form-control(name='message', rows="3", required='required')
 
   button.btn.btn-default(type='submit') Отправить
