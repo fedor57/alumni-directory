@@ -19,7 +19,7 @@ block content
     nav#student-nav.navbar.navbar-default.navbar-fixed-bottom(style="height: 310px;")
       .container(style="height: 100%;")
 
-    ul#students
+    ul#students.students-list
         - for student in object_list
             li.student(data-href="{% url 'student-detail' pk=student.id %}")
                 include include/student_item
