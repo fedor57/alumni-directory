@@ -7,6 +7,8 @@
         h4.modal-title Авторизация
       .modal-body
         form(action="{% url 'api-login' %}", method="post")
+          .form-group
+            p#login-error.bg-danger Введите правильный код
           - csrf_token
           .form-group
             label Код аутентификации
@@ -21,22 +23,37 @@
         modal = $('#modal-login')
         form = modal.find 'form'
         key_auth = 'is_auth'
+        login_error = $('#login-error')
+        auth_ptrn = /\w[\w-]+-\d{5,}$/
         auth_code = '{{ request.session.auth_code|default:"" }}'
+
+        rend_auth_code = (auth_code) ->
+            auth_code = auth_code.replace /(-)\d+(\d{4})$/, '$1XXXXXXXXXXX$2'
+            $('#btn-login').text auth_code
+
+        if auth_code.length
+            rend_auth_code auth_code
 
         window.check_login = ->
             sess = sessionStorage.getItem key_auth
             if !sess and auth_code.length == 0
                 modal.css 'z-index', 2000
+                login_error.hide()
                 modal.modal 'show'
                 return true
             return false
-        check_login()
 
         sendForm = ->
+            code = form.find('[name="auth_code"]').val()
+            if code.length > 0 and !auth_ptrn.test(code)
+                login_error.show()
+                return
+            login_error.hide()
+
             $.post form.prop('action'), form.serialize(), (data) ->
                 if not data.length
                     data = 'Вход'
-                $('#btn-login').text(data)
+                rend_auth_code data
                 sessionStorage.setItem key_auth, true
                 modal.modal 'hide'
 

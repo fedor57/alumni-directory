@@ -56,11 +56,7 @@
           </form>
           <ul class="nav navbar-nav navbar-right">
             <li><a id="btn-login" href="#" data-toggle="modal" data-target="#modal-login">
-                {% if request.session.auth_code %}
-                    {{ request.session.auth_code }}
-                {% else %}
                     Вход
-                {% endif %}
                 </a>
             </li>
           </ul>
