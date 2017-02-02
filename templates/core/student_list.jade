@@ -15,7 +15,7 @@ block scripts
       .value-untrusted {
         font-style: italic;
       }
-      .students-list li {
+      .students-list .student {
         margin-top: 9px;
       }
       .students-bottom {
@@ -102,8 +102,8 @@ block content
             - for student in students
               .col-sm-6.student(data-href="{% url 'student-detail' pk=student.id %}")
                 include include/student_item
-              - empty
-                li Пусто.
+        - empty
+          p Пусто.
 
     - if page_obj
         - bootstrap_pagination page_obj url=request.get_full_path
