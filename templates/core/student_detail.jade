@@ -27,7 +27,7 @@ block content
       li.active(role='presentation')
         a(href='#tab-student', aria-controls='tab-student', role='tab', data-toggle='tab') {{ object.name }}
       li(role='presentation')
-        a(href='#tab-send', aria-controls='tab-send', role='tab', data-toggle='tab') Написать
+        a#send-email(href='#tab-send', aria-controls='tab-send', role='tab', data-toggle='tab') Написать
       li(role='presentation')
         a(href='#tab-fb', aria-controls='tab-fb', role='tab', data-toggle='tab') Facebook
       li(role='presentation')
@@ -84,27 +84,29 @@ block content
           - with field_email=grouped_modifications.email.0
             include core/sendmail_form
         - else
-          | Нет данных о e-mail
-        p
-          a.add-field(href="#", data-feild-type='email') Добавить
+          p Нет данных о e-mail
+          p
+            a.add-field(href="#", data-feild-type='email') Добавить
       #tab-fb.tab-pane(role='tabpanel')
         br
         - if 'social_fb' in grouped_modifications
           - for modif in grouped_modifications.social_fb
-            a(href="{{ modif.field_value }}")
-              | {{ modif.field_value }}
+            p
+              a(href="{{ modif.field_value }}")
+                | {{ modif.field_value }}
         - else
-          | Нет данных о социальной сети
+          p Нет данных о социальной сети
         p
           a.add-field(href="#", data-feild-type='social_fb') Добавить
       #tab-vk.tab-pane(role='tabpanel')
         br
         - if 'social_vk' in grouped_modifications
           - for modif in grouped_modifications.social_vk
-            a(href="{{ modif.field_value }}")
-              | {{ modif.field_value }}
+            p
+              a(href="{{ modif.field_value }}")
+                | {{ modif.field_value }}
         - else
-          | Нет данных о социальной сети
+          p Нет данных о социальной сети
         p
           a.add-field(href="#", data-feild-type='social_vk') Добавить
       #tab-add.tab-pane(role='tabpanel')
