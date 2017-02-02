@@ -33,7 +33,7 @@ block content
       li(role='presentation')
         a(href='#tab-vk', aria-controls='tab-vk', role='tab', data-toggle='tab') ВКонтакте
       li(role='presentation')
-        a(href='#tab-add', aria-controls='tab-add', role='tab', data-toggle='tab') Добавить
+        a#add-field(href='#tab-add', aria-controls='tab-add', role='tab', data-toggle='tab') Добавить
 
     style.
         .field-trusted {}
@@ -85,22 +85,28 @@ block content
             include core/sendmail_form
         - else
           | Нет данных о e-mail
+        p
+          a.add-field(href="#", data-feild-type='email') Добавить
       #tab-fb.tab-pane(role='tabpanel')
         br
         - if 'social_fb' in grouped_modifications
-          - with modification=grouped_modifications.social_vk
-            a(href="{{ modification.field_value }}")
-              | {{ modification.field_value }}
+          - for modif in grouped_modifications.social_fb
+            a(href="{{ modif.field_value }}")
+              | {{ modif.field_value }}
         - else
           | Нет данных о социальной сети
+        p
+          a.add-field(href="#", data-feild-type='social_fb') Добавить
       #tab-vk.tab-pane(role='tabpanel')
         br
         - if 'social_vk' in grouped_modifications
-          - with modification=grouped_modifications.social_vk
-            a(href="{{ modification.field_value }}")
-              | {{ modification.field_value }}
+          - for modif in grouped_modifications.social_vk
+            a(href="{{ modif.field_value }}")
+              | {{ modif.field_value }}
         - else
           | Нет данных о социальной сети
+        p
+          a.add-field(href="#", data-feild-type='social_vk') Добавить
       #tab-add.tab-pane(role='tabpanel')
         br
         include core/fieldvalue_form

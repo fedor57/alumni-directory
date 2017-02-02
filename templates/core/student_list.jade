@@ -61,6 +61,11 @@ block scripts
                 modal_body.load url + ' #tab-send', ->
                     modal.modal('show')
 
+            nav.on 'click', '.add-field', (e) ->
+                t = $ e.target
+                nav.find('[name=field_name]').val t.data('feild-type')
+                $('#add-field').tab 'show'
+
     include core/include_vote
 
 block content
