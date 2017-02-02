@@ -126,15 +126,14 @@ class FieldValue(Timestamped):
     FIELD_SOCIAL_FB = 'social_fb'
     FIELD_GRADE = 'grade'
     EDITABLE_FIELDS = (
-        (FIELD_NAME, 'Информация об изменении имени/фамилии'),
-        (FIELD_EMAIL, 'Email, который не отображается, '
-                      'но на который можно написать через форму'),
+        (FIELD_NAME, 'Изменения фамилии / имени'),
+        (FIELD_EMAIL, 'Email'),
         (FIELD_CITY, 'Город'),
-        (FIELD_COMPANY, 'Компания/ВУЗ'),
-        (FIELD_LINK, 'Ссылка'),
+        (FIELD_COMPANY, 'Компания / ВУЗ'),
+        (FIELD_LINK, 'Домашняя страница'),
         (FIELD_SOCIAL_FB, 'Facebook'),
         (FIELD_SOCIAL_VK, 'ВКонтакте'),
-        (FIELD_GRADE, 'Класс'),
+        (FIELD_GRADE, 'Учился также в классе'),
     )
 
     STATUS_TRUSTED = 'trusted'
