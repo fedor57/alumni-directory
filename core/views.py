@@ -32,12 +32,7 @@ class AlphabetView(TemplateView):
 
     def get_context_data(self, **kwargs):
         data = super(AlphabetView, self).get_context_data(**kwargs)
-        a = 1040
-        z = 1071
-        try:
-            data['characters'] = map(unichr, xrange(a, z))
-        except:
-            data['characters'] = map(chr, range(a, z))
+        data['characters'] = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ'
         return data
 
 
