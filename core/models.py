@@ -23,6 +23,7 @@ class Grade(models.Model):
     """
     Класс
     """
+    is_grade = True
     letter = models.CharField(max_length=1)
     graduation_year = models.PositiveSmallIntegerField()  # TODO: вылидировать год
     # TODO: добавить читаемый id

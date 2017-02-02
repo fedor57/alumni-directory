@@ -88,19 +88,22 @@ block content
     nav#student-nav.navbar.navbar-default.navbar-fixed-bottom(style="height: 310px;")
       .container(style="height: 100%;")
 
-    - for group, students in object_list
+    #students.students-list
+      - for group, students in object_list
         article
-            h1
-                block group_header
-                    | {{ group }}
+          h1
+            - if group.is_grade
+              a(href="{% url 'student-list' %}?grade_id={{ group.pk }}")
+                | {{ group }}
+            - else
+              | {{ group }}
 
-            ul#students.students-list
-                - for student in students
-                    li.student(data-href="{% url 'student-detail' pk=student.id %}")
-                        include include/student_item
-
-                    - empty
-                        li Пусто.
+          ul
+            - for student in students
+              li.student(data-href="{% url 'student-detail' pk=student.id %}")
+                include include/student_item
+              - empty
+                li Пусто.
 
     - if page_obj
         - bootstrap_pagination page_obj url=request.get_full_path
