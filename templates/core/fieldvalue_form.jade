@@ -1,13 +1,15 @@
 
-form(action="{% url 'student-value-create' pk=object.pk %}", method="post")
+form.row(action="{% url 'student-value-create' pk=object.pk %}", method="post")
   - csrf_token
-  .form-group
+  .col-sm-5.form-group
     label Тип факта
     select.form-control(name='field_name')
       - for val, descr in field_types
         option(value='{{ val }}') {{ descr }}
-  .form-group
+  .col-sm-5.form-group
     label Значение
     input.suggest.form-control(name='field_value', type='text',
                                required='required')
-  button.btn.btn-default(type='submit') Добавить факт
+  .col-sm-2.form-group
+    label &nbsp;
+    button.btn.btn-default.form-control(type='submit') Добавить факт
