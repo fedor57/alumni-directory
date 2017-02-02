@@ -7,3 +7,4 @@ block content
     h2
         - for ch in characters
             a(href="{% url 'student-list' %}?char={{ ch }}") {{ ch }}
+            = ' '
