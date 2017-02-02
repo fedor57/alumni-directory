@@ -43,10 +43,12 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             {% block nav %}
-              <li class="active"><a href="/">Список классов</a></li>
+              <li><a href="/">Выпускники</a></li>
+              <li><a href="/">Алфавитный указатель</a></li>
+              <li><a href="{% url 'student-create' %}">Добавить</a></li>
             {% endblock %}
           </ul>
-          <form class="navbar-form navbar-left" action="{% url 'search-list' %}">
+          <form class="navbar-form navbar-left" action="{% url 'student-list' %}">
             <div class="form-group">
               <input name="query" type="text"
                      class="suggest-students form-control"
