@@ -94,8 +94,8 @@ class StudentListView(BaseStudentListView):
             qs = qs.filter(main_grade_id=self.grade_id)
         elif self.year:
             qs = qs.filter(main_grade__graduation_year=self.year)
-        if not self.grade_id:
-            qs = qs.order_by('-main_grade__graduation_year', 'main_grade__letter', )
+        if query or self.year:
+            qs = qs.order_by('-main_grade__graduation_year', 'main_grade__letter', 'name')
         return qs.prefetch_related('main_grade')
 
     def get_context_data(self, **kwargs):
