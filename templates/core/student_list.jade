@@ -1,13 +1,5 @@
 extends 'core/base.html'
-
-block nav
-    li
-        a(href="/") Список классов
-    li.active
-        a Класс "{{ grade.letter }}" выпуск {{ grade.graduation_year }} года
-    li
-        a(href="{% url 'grade-student-create' grade_id=grade.id %}")
-            | Добавить выпускника
+- load bootstrap3
 
 block scripts
     style.
@@ -72,9 +64,19 @@ block scripts
     include core/include_vote
 
 block content
-    h1
-        | Список выпускников класса "{{ grade.letter }}"
-        | {{ grade.graduation_year }} года выпуска:
+    block breadcrumb
+        - if not request.GET.query
+            ol.breadcrumb
+                li
+                    a(href='/') Выпускники
+                - if grade
+                    li
+                        a(href="{% url 'student-list' %}?year={{ grade.graduation_year }}")
+                            | {{ grade.graduation_year }}
+                    li.active {{ grade.letter }}
+                - if year
+                    li.active {{ year }}
+
 
     #student-modal.modal.fade(tabindex='-1', role='dialog')
       .modal-dialog.modal-lg(role='document')
@@ -83,12 +85,21 @@ block content
     nav#student-nav.navbar.navbar-default.navbar-fixed-bottom(style="height: 310px;")
       .container(style="height: 100%;")
 
-    ul#students.students-list
-        - for student in object_list
-            li.student(data-href="{% url 'student-detail' pk=student.id %}")
-                include include/student_item
+    - for group, students in object_list
+        article
+            h1
+                block group_header
+                    | {{ group }}
 
-            - empty
-                li Пусто.
+            ul#students.students-list
+                - for student in students
+                    li.student(data-href="{% url 'student-detail' pk=student.id %}")
+                        include include/student_item
+
+                    - empty
+                        li Пусто.
+
+    - if page_obj
+        - bootstrap_pagination page_obj url=request.get_full_path
 
     .students-bottom

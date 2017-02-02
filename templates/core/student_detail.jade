@@ -1,13 +1,16 @@
 extends 'core/base.html'
 
-block nav
-    li
-        a(href="/") Список классов
-    li
-        a(href="{% url 'student-list' grade_id=grade.pk %}")
-            | Класс "{{ grade.letter }}" выпуск {{ grade.graduation_year }} года
-    li.active
-        a {{ object.name }}
+block breadcrumb
+    ol.breadcrumb
+        li
+            a(href='/') Выпускники
+        li
+            a(href="{% url 'student-list' %}?year={{ grade.graduation_year }}")
+                | {{ grade.graduation_year }}
+        li
+            a(href="{% url 'student-list' %}?grade_id={{ grade.pk }}")
+                | {{ grade.letter }}
+        li.active {{ object.name }}
 
 block scripts
   style.

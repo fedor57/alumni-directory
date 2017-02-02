@@ -3,10 +3,6 @@ a.student-window
     - for name in student.ordered_facts.name
         |  ({{ name.field_value }})
 
-- if not grade
-    a(href="{% url 'student-list' grade_id=student.main_grade.pk %}")
-        span.value-badge {{ student.main_grade }}
-
 - for name, modifications in student.ordered_facts.items
   - for modif in modifications
     - if modif.status in 'trusted untrusted'
@@ -15,12 +11,12 @@ a.student-window
         span.student-email.value-badge(class="value-{{ modif.status }}") @
 
       - elif modif.field_name == 'city'
-        a(href="{% url 'search-list' %}?query={{ modif.field_value }}",
+        a(href="{% url 'student-list' %}?query={{ modif.field_value }}",
             data-toggle="tooltip", data-placement="top", title="Город")
           span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
 
       - elif modif.field_name == 'company'
-        a(href="{% url 'search-list' %}?query={{ modif.field_value }}",
+        a(href="{% url 'student-list' %}?query={{ modif.field_value }}",
             data-toggle="tooltip", data-placement="top", title="Компания/ВУЗ")
           span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
 
