@@ -32,13 +32,16 @@ block scripts
             nav = $ '#student-nav'
             nav.hide()
             students = $ '#students'
-            students.on 'click', '.student-window', (e) ->
+            show_tabs = (e) ->
                 e.preventDefault()
                 astudent = $ e.target
+                send_email = astudent.hasClass 'student-email'
                 if not astudent.hasClass 'student'
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
                 nav.load url + ' #main-content > *', ->
+                    if send_email
+                        $('#send-email').tab 'show'
                     nav.slideDown()
                     suggest = nav.find '.suggest'
                     url = '{% url "suggest-list" %}'
@@ -48,18 +51,8 @@ block scripts
                           process data.data
                       matcher: -> true
 
-            students.on 'click', '.student-email', (e) ->
-                e.preventDefault()
-                astudent = $ e.target
-                if not astudent.hasClass 'student'
-                    astudent = astudent.parents '.student'
-                url = astudent.data 'href'
-                modal_body = $ '<div class="modal-body">'
-                mc = modal.find('.modal-content')
-                mc.html ''
-                mc.append modal_body
-                modal_body.load url + ' #tab-send', ->
-                    modal.modal('show')
+            students.on 'click', '.student-window', show_tabs
+            students.on 'click', '.student-email', show_tabs
 
             nav.on 'click', '.add-field', (e) ->
                 t = $ e.target
