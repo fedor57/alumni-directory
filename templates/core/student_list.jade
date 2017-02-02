@@ -98,9 +98,9 @@ block content
             - else
               | {{ group }}
 
-          ul
+          .row
             - for student in students
-              li.student(data-href="{% url 'student-detail' pk=student.id %}")
+              .col-sm-6.student(data-href="{% url 'student-detail' pk=student.id %}")
                 include include/student_item
               - empty
                 li Пусто.
