@@ -44,7 +44,7 @@
           <ul class="nav navbar-nav">
             {% block nav %}
               <li><a href="/">Выпускники</a></li>
-              <li><a href="/">Алфавитный указатель</a></li>
+              <li><a href="{% url 'alphabet-list' %}">Алфавитный указатель</a></li>
               <li><a href="{% url 'student-create' %}">Добавить</a></li>
             {% endblock %}
           </ul>

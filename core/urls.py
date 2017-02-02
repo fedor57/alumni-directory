@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from .views import (
+    AlphabetView,
     GradeListView,
     StudentListView,
     SuggestListView,
@@ -14,6 +15,7 @@ from .views import (
 
 urlpatterns = [
     url(r'^$', GradeListView.as_view(), name='grade-list'),
+    url(r'^alphabet/$', AlphabetView.as_view(), name='alphabet-list'),
     url(r'^api/login$', auth_code_login, name='api-login'),
     url(r'^suggest/$', SuggestListView.as_view(), name='suggest-list'),
     url(r'^students/$', StudentListView.as_view(), name='student-list'),

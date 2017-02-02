@@ -1,0 +1,9 @@
+extends 'core/base.html'
+
+block content
+
+    h1 Алфавитный указатель:
+
+    h2
+        - for ch in characters
+            a(href="{% url 'student-list' %}?char={{ ch }}") {{ ch }}

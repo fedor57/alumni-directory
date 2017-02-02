@@ -1,10 +1,12 @@
 # coding=utf-8
+from __future__ import unicode_literals
 import itertools
 import operator
 
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import JsonResponse
+from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
@@ -23,6 +25,20 @@ def auth_code_login(request):
     if 'auth_code' in request.session:
         return HttpResponse()
     return HttpResponse(status=403)
+
+
+class AlphabetView(TemplateView):
+    template_name = 'core/alphabet.jade'
+
+    def get_context_data(self, **kwargs):
+        data = super(AlphabetView, self).get_context_data(**kwargs)
+        a = 1040
+        z = 1071
+        try:
+            data['characters'] = map(unichr, xrange(a, z))
+        except:
+            data['characters'] = map(chr, range(a, z))
+        return data
 
 
 class GradeListView(ListView):
@@ -50,12 +66,14 @@ class BaseStudentListView(ListView):
 
 class StudentListView(BaseStudentListView):
     template_name = 'core/student_list.jade'
-    paginate_by = 24
+    paginate_by = 100
 
     def get_paginate_by(self, queryset):
         if self.year:
             return None
         elif self.grade_id:
+            return None
+        elif self.char:
             return None
         return super(StudentListView, self).get_paginate_by(queryset)
 
@@ -64,6 +82,7 @@ class StudentListView(BaseStudentListView):
         if self.grade_id and not Grade.objects.filter(id=self.grade_id).exists():
             raise Http404()
         self.year = self.request.GET.get('year')
+        self.char = self.request.GET.get('char')
         return super(StudentListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -74,6 +93,8 @@ class StudentListView(BaseStudentListView):
             q &= ~Q(modifications__status=FieldValue.STATUS_DELETED)
             q |= Q(name__icontains=query)
             qs = qs.filter(q).distinct()
+        elif self.char:
+            qs = qs.filter(name__startswith=self.char)
         elif self.grade_id:
             qs = qs.filter(main_grade_id=self.grade_id)
         elif self.year:
@@ -87,12 +108,18 @@ class StudentListView(BaseStudentListView):
         if self.grade_id:
             context_data['grade'] = Grade.objects.get(id=self.grade_id)
         context_data['year'] = self.year
+        context_data['char'] = self.char
         res = []
         qs = context_data['object_list']
-        for g, i in itertools.groupby(qs, key=lambda s: s.main_grade.pk):
-            l = list(i)
-            g = l[0].main_grade
-            res.append((g, l))
+        if self.char:
+            for g, i in itertools.groupby(qs, key=lambda x: x.name[0]):
+                l = list(i)
+                res.append(('Буква ' + g.upper(), l))
+        else:
+            for g, i in itertools.groupby(qs, key=lambda s: s.main_grade.pk):
+                l = list(i)
+                g = l[0].main_grade
+                res.append((g, l))
         context_data['object_list'] = res
         return context_data
 

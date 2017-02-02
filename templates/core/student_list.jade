@@ -74,8 +74,11 @@ block content
                         a(href="{% url 'student-list' %}?year={{ grade.graduation_year }}")
                             | {{ grade.graduation_year }}
                     li.active {{ grade.letter }}
-                - if year
+                - elif year
                     li.active {{ year }}
+                - elif char
+                    li.active Буква {{ char.upper }}
+
 
 
     #student-modal.modal.fade(tabindex='-1', role='dialog')
