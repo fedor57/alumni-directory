@@ -29,6 +29,15 @@ class GradeListView(ListView):
     model = Grade
     template_name = 'core/grade_list.jade'
 
+    def get_context_data(self, **kwargs):
+        data = super(GradeListView, self).get_context_data(**kwargs)
+        qs = data['object_list']
+        result = []
+        for g, i in itertools.groupby(qs, key=lambda x: x.graduation_year):
+            result.append((g, list(i)))
+        data['grades'] = result
+        return data
+
 
 class BaseStudentListView(ListView):
     model = Student
@@ -39,40 +48,53 @@ class BaseStudentListView(ListView):
         return qs
 
 
-class GradeStudentListView(BaseStudentListView):
+class StudentListView(BaseStudentListView):
     template_name = 'core/student_list.jade'
+    paginate_by = 24
+
+    def get_paginate_by(self, queryset):
+        if self.year:
+            return None
+        elif self.grade_id:
+            return None
+        return super(StudentListView, self).get_paginate_by(queryset)
 
     def get(self, request, *args, **kwargs):
-        if not Grade.objects.filter(id=self.kwargs.get('grade_id')).exists():
+        self.grade_id = self.request.GET.get('grade_id')
+        if self.grade_id and not Grade.objects.filter(id=self.grade_id).exists():
             raise Http404()
-        return super(GradeStudentListView, self).get(request, *args, **kwargs)
+        self.year = self.request.GET.get('year')
+        return super(StudentListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-        qs = super(GradeStudentListView, self).get_queryset()
-        return qs.filter(main_grade_id=self.kwargs.get('grade_id'))
-
-    def get_context_data(self, **kwargs):
-        context_data = super(GradeStudentListView, self).get_context_data(**kwargs)
-        context_data['grade'] = Grade.objects.get(id=self.kwargs.get('grade_id'))
-        return context_data
-
-
-class SearchStudentListView(BaseStudentListView):
-    template_name = 'core/search_list.jade'
-    paginate_by = 25
-
-    def get_queryset(self):
+        qs = super(StudentListView, self).get_queryset()
         query = self.request.GET.get('query')
-        qs = super(SearchStudentListView, self).get_queryset()
         if query:
             q = Q(modifications__field_value__icontains=query)
             q &= ~Q(modifications__status=FieldValue.STATUS_DELETED)
             q |= Q(name__icontains=query)
-            qs = qs.prefetch_related('main_grade')
             qs = qs.filter(q).distinct()
-        else:
-            qs = qs.none()
-        return qs
+        elif self.grade_id:
+            qs = qs.filter(main_grade_id=self.grade_id)
+        elif self.year:
+            qs = qs.filter(main_grade__graduation_year=self.year)
+        if not self.grade_id:
+            qs = qs.order_by('-main_grade__graduation_year', 'main_grade__letter', )
+        return qs.prefetch_related('main_grade')
+
+    def get_context_data(self, **kwargs):
+        context_data = super(StudentListView, self).get_context_data(**kwargs)
+        if self.grade_id:
+            context_data['grade'] = Grade.objects.get(id=self.grade_id)
+        context_data['year'] = self.year
+        res = []
+        qs = context_data['object_list']
+        for g, i in itertools.groupby(qs, key=lambda s: s.main_grade.pk):
+            l = list(i)
+            g = l[0].main_grade
+            res.append((g, l))
+        context_data['object_list'] = res
+        return context_data
 
 
 class SuggestListView(ListView):

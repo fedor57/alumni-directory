@@ -34,7 +34,7 @@ class Grade(models.Model):
         ordering = ('-graduation_year', 'letter')
 
     def __unicode__(self):
-        return '%s "%s"' % (self.graduation_year, self.letter)
+        return '%s%s' % (self.graduation_year, self.letter)
 
 
 class AuthCodeManager(models.Manager):
