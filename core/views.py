@@ -238,6 +238,13 @@ class FieldValueCreateView(CreateView):
 
         # Привязываем правку к выпускнику по id из урла
         student_id = self.kwargs.get('pk')
+        exists = FieldValue.objects.filter(
+            target_id=student_id,
+            field_name=self.object.field_name,
+            field_value__iexact=self.object.field_value,
+        ).exists()
+        if exists:
+            return HttpResponseRedirect(self.get_success_url())
         try:
             self.object.target = Student.objects.get(id=student_id)
         except Student.objects.DoesNotExist:
@@ -258,7 +265,7 @@ class FieldValueCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('student-detail', args=[str(self.kwargs['pk'])])
+        return reverse('student-detail', args=[self.kwargs['pk']])
 
 
 def handle_vote(request, pk, vote_type):
@@ -297,9 +304,8 @@ class SendMailView(CreateView):
 
     def form_valid(self, form):
         # Идентификатор FieldValue c email
-        fv_id = self.kwargs.get('pk')
         try:
-            email = FieldValue.objects.get(id=fv_id).field_value
+            email = self.get_object().field_value
         except FieldValue.objects.DoesNotExist:
             return Http404()
 
@@ -314,5 +320,5 @@ class SendMailView(CreateView):
 
     def get_success_url(self):
         return reverse('student-detail', kwargs={
-            'pk': str(self.object.field_value.target_id)
+            'pk': str(self.get_object().target_id)
         })
