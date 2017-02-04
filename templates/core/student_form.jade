@@ -1,6 +1,11 @@
 extends 'core/base.html'
 - load bootstrap3
 
+block scripts
+    :coffeescript
+        $ ->
+            check_login()
+
 block content
     h1 Добавить выпускника
     form(action="{% url 'student-create' %}", method="post")
