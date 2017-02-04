@@ -32,16 +32,15 @@ block scripts
             nav = $ '#student-nav'
             nav.hide()
             students = $ '#students'
-            show_tabs = (e) ->
-                e.preventDefault()
-                astudent = $ e.target
-                send_email = astudent.hasClass 'student-email'
+            student = null
+
+            show_tabs = (astudent, callback) ->
                 if not astudent.hasClass 'student'
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
                 nav.load url + ' #main-content > *', ->
-                    if send_email
-                        $('#send-email').tab 'show'
+                    if callback
+                        callback()
                     nav.slideDown()
                     suggest = nav.find '.suggest'
                     url = '{% url "suggest-list" %}'
@@ -51,13 +50,33 @@ block scripts
                           process data.data
                       matcher: -> true
 
-            students.on 'click', '.student-window', show_tabs
-            students.on 'click', '.student-email', show_tabs
+            students.on 'click', '.student-window', (e) ->
+                e.preventDefault()
+                student = $ e.target
+                show_tabs student
+
+            students.on 'click', '.student-email', (e) ->
+                e.preventDefault()
+                student = $ e.target
+                show_tabs student, ->
+                    $('#send-email').tab 'show'
 
             nav.on 'click', '.add-field', (e) ->
+                e.preventDefault()
                 t = $ e.target
                 nav.find('[name=field_name]').val t.data('feild-type')
                 $('#add-field').tab 'show'
+
+            send_form = (e) ->
+                check_login ->
+                    form = $ e.target
+                    url = form.attr 'action'
+                    $.post url, form.serialize(), ->
+                        form.text 'OK'
+                        setTimeout show_tabs student, 2000
+                return false
+            nav.on 'submit', '#from-add-fact', send_form
+            nav.on 'submit', '#sendmail', send_form
 
     include core/include_vote
 

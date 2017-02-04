@@ -1,5 +1,5 @@
 
-form.row(action="{% url 'student-value-create' pk=object.pk %}", method="post")
+form#from-add-fact.row(action="{% url 'student-value-create' pk=object.pk %}", method="post")
   - csrf_token
   .col-sm-5.form-group
     label Тип факта
