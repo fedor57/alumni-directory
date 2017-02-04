@@ -34,13 +34,16 @@
         if auth_code.length
             rend_auth_code auth_code
 
-        window.check_login = ->
+        window.check_login = (callback) ->
             sess = sessionStorage.getItem key_auth
             if !sess and auth_code.length == 0
                 modal.css 'z-index', 2000
                 login_error.hide()
                 modal.modal 'show'
+                modal.callback = callback
                 return true
+            if callback
+                callback()
             return false
 
         sendForm = ->
@@ -56,6 +59,8 @@
                 rend_auth_code data
                 sessionStorage.setItem key_auth, true
                 modal.modal 'hide'
+                if modal.callback
+                    modal.callback()
 
         modal.on 'click', '#btn-login', sendForm
 
