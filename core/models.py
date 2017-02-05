@@ -101,7 +101,9 @@ class Student(Timestamped):
         result = OrderedDict()
         for name, text, _ in FieldValue.EDITABLE_FIELDS:
             result[name] = []
-        ms = self.modifications.all()
+        order = [i[0] for i in FieldValue.STATUS_CHOICES]
+        key = lambda x: order.index(x.status)
+        ms = sorted(self.modifications.all(), key=key)
         for m in ms:
             result[m.field_name].append(m)
         return result
