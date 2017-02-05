@@ -76,6 +76,10 @@ block scripts
                         setTimeout show_tabs student, 2000
                 return false
             nav.on 'submit', '#from-add-fact', send_form
+            nav.on 'change', '#field-name', (e) ->
+                t = $ e.target
+                option = t.find ':selected'
+                $('#field-descr').text option.data('descr')
             nav.on 'submit', '#sendmail', send_form
 
     include core/include_vote
