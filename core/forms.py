@@ -28,8 +28,9 @@ class StudentCreateForm(forms.ModelForm):
 
 
 class FieldValueForm(forms.ModelForm):
-    field_name = forms.ChoiceField(label='Тип правки',
-                                   choices=FieldValue.EDITABLE_FIELDS)
+    field_name = forms.ChoiceField(
+        label='Тип правки',
+        choices=[(k, v) for k, v, h in FieldValue.EDITABLE_FIELDS])
     field_value = forms.CharField(label='Значение правки')
 
     class Meta:

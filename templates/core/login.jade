@@ -42,7 +42,7 @@
                 modal.modal 'show'
                 modal.callback = callback
                 return true
-            if callback
+            if callback != null
                 callback()
             return false
 

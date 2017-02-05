@@ -39,7 +39,7 @@ block scripts
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
                 nav.load url + ' #main-content > *', ->
-                    if callback
+                    if callback != null
                         callback()
                     nav.slideDown()
                     suggest = nav.find '.suggest'
@@ -64,7 +64,9 @@ block scripts
             nav.on 'click', '.add-field', (e) ->
                 e.preventDefault()
                 t = $ e.target
-                nav.find('[name=field_name]').val t.data('feild-type')
+                f = nav.find '[name=field_name]'
+                f.val t.data 'feild-type'
+                f.change()
                 $('#add-field').tab 'show'
 
             send_form = (e) ->
@@ -73,7 +75,7 @@ block scripts
                     url = form.attr 'action'
                     $.post url, form.serialize(), ->
                         form.text 'OK'
-                        setTimeout show_tabs student, 2000
+                        setTimeout -> show_tabs student, 2000
                 return false
             nav.on 'submit', '#from-add-fact', send_form
             nav.on 'change', '#field-name', (e) ->
