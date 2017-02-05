@@ -99,7 +99,7 @@ class Student(Timestamped):
     @cached_property
     def ordered_facts(self):
         result = OrderedDict()
-        for name, text in FieldValue.EDITABLE_FIELDS:
+        for name, text, _ in FieldValue.EDITABLE_FIELDS:
             result[name] = []
         ms = self.modifications.all()
         for m in ms:
@@ -126,14 +126,14 @@ class FieldValue(Timestamped):
     FIELD_SOCIAL_FB = 'social_fb'
     FIELD_GRADE = 'grade'
     EDITABLE_FIELDS = (
-        (FIELD_NAME, 'Изменения фамилии / имени'),
-        (FIELD_EMAIL, 'Email'),
-        (FIELD_CITY, 'Город'),
-        (FIELD_COMPANY, 'Компания / ВУЗ'),
-        (FIELD_LINK, 'Домашняя страница'),
-        (FIELD_SOCIAL_FB, 'Facebook'),
-        (FIELD_SOCIAL_VK, 'ВКонтакте'),
-        (FIELD_GRADE, 'Учился также в классе'),
+        (FIELD_NAME, 'Изменения фамилии / имени', ''),
+        (FIELD_EMAIL, 'Email', 'Скрыт от просмотра, но на него можно написать'),
+        (FIELD_CITY, 'Город', ''),
+        (FIELD_COMPANY, 'Компания / ВУЗ', ''),
+        (FIELD_LINK, 'Домашняя страница', ''),
+        (FIELD_SOCIAL_FB, 'Facebook', ''),
+        (FIELD_SOCIAL_VK, 'ВКонтакте', ''),
+        (FIELD_GRADE, 'Учился также в классе', ''),
     )
 
     STATUS_TRUSTED = 'trusted'
@@ -154,7 +154,8 @@ class FieldValue(Timestamped):
         verbose_name='Автор правки',
         blank=True, null=True)
     field_name = models.CharField(
-        'Имя поля', choices=EDITABLE_FIELDS, max_length=20)
+        'Имя поля', max_length=20,
+        choices=[(k, v) for k, v, h in EDITABLE_FIELDS])
     field_value = models.CharField('Значение поля', max_length=200)
     status = models.CharField('Статус правки', choices=STATUS_CHOICES,
                               default=STATUS_TRUSTED, max_length=20)
