@@ -39,7 +39,7 @@ block scripts
                     astudent = astudent.parents '.student'
                 url = astudent.data 'href'
                 nav.load url + ' #main-content > *', ->
-                    if callback != null
+                    if !!callback
                         callback()
                     nav.slideDown()
                     suggest = nav.find '.suggest'

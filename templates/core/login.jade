@@ -42,7 +42,7 @@
                 modal.modal 'show'
                 modal.callback = callback
                 return true
-            if callback != null
+            if !!callback
                 callback()
             return false
 
@@ -59,7 +59,7 @@
                 rend_auth_code data
                 sessionStorage.setItem key_auth, true
                 modal.modal 'hide'
-                if modal.callback
+                if !!modal.callback
                     modal.callback()
 
         modal.on 'click', '#btn-login', sendForm
