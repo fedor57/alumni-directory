@@ -184,8 +184,10 @@ class StudentDetailView(DetailView):
             self.object.modifications.order_by('field_name'),
             lambda modification: modification.field_name
         )
+        order = [i[0] for i in FieldValue.STATUS_CHOICES]
+        key = lambda x: order.index(x.status)
         modifications = dict(
-            (field_name, list(field_values))
+            (field_name, sorted(field_values, key=key))
             for field_name, field_values
             in grouped_modifications_iterator
         )
