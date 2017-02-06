@@ -185,7 +185,7 @@ class StudentDetailView(DetailView):
             lambda modification: modification.field_name
         )
         order = [i[0] for i in FieldValue.STATUS_CHOICES]
-        key = lambda x: order.index(x.status)
+        key = lambda x: (order.index(x.status), -x.votes)
         modifications = dict(
             (field_name, sorted(field_values, key=key))
             for field_name, field_values

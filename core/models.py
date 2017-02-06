@@ -102,7 +102,7 @@ class Student(Timestamped):
         for name, text, _ in FieldValue.EDITABLE_FIELDS:
             result[name] = []
         order = [i[0] for i in FieldValue.STATUS_CHOICES]
-        key = lambda x: order.index(x.status)
+        key = lambda x: (order.index(x.status), -x.votes)
         ms = sorted(self.modifications.all(), key=key)
         for m in ms:
             result[m.field_name].append(m)
