@@ -1,7 +1,10 @@
 a.student-window
     | {{ student.name }}
-    - for name in student.ordered_facts.name
-        |  ({{ name.field_value }})
+    - for n in student.ordered_facts.name
+      - if n.status == 'trusted'
+        |  ({{ n.field_value }})
+      - else
+        i  ({{ n.field_value }})
 
 - for name, modifications in student.ordered_facts.items
   - for modif in modifications
