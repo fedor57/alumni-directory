@@ -208,13 +208,19 @@ class FieldValue(Timestamped):
         votes = sorted(votes.items(), key=lambda v: v[1], reverse=True)
         if len(votes) == 0:
             return
-        is_first = True
+        first = values[votes[0][0]]
+        trusted = []
+        if first.timestamp > fresh.timestamp:
+            trusted.append(first.pk)
+        else:
+            trusted.append(fresh.pk)
         for pk, c in votes:
             f = values[pk]
             if c < 0:
                 need_status = FieldValue.STATUS_HIDDEN
-            elif is_first or fresh.pk == pk or \
-                    fresh.field_name == cls.FIELD_LINK:
+            elif fresh.field_name == cls.FIELD_LINK:
+                need_status = FieldValue.STATUS_TRUSTED
+            elif pk in trusted:
                 need_status = FieldValue.STATUS_TRUSTED
             else:
                 need_status = FieldValue.STATUS_UNTRUSTED
@@ -223,7 +229,6 @@ class FieldValue(Timestamped):
                 f.status = need_status
                 f.status_update_date = timezone.now()
                 f.save(update_fields=['status', 'status_update_date'])
-            is_first = False
 
 
 class Vote(Timestamped):
