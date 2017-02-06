@@ -110,6 +110,7 @@ class StudentListView(BaseStudentListView):
             for g, i in itertools.groupby(qs, key=lambda x: x.name[0]):
                 l = list(i)
                 res.append(('Буква ' + g.upper(), l))
+            context_data['show_grade'] = True
         else:
             for g, i in itertools.groupby(qs, key=lambda s: s.main_grade.pk):
                 l = list(i)

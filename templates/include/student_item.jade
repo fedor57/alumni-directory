@@ -6,6 +6,10 @@ a.student-window
       - else
         i  ({{ n.field_value }})
 
+- if show_grade
+    a(href="{% url 'student-list'  %}?grade_id={{ student.main_grade.pk }}")
+        span.value-badge {{ student.main_grade }}
+
 - for name, modifications in student.ordered_facts.items
   - for modif in modifications
     - if modif.status in 'trusted untrusted'
