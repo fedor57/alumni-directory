@@ -84,6 +84,14 @@ block scripts
                 $('#field-descr').text option.data('descr')
             nav.on 'submit', '#sendmail', send_form
 
+            nav.on 'click', '.show-hidden', (e) ->
+                t = $ e.target
+                if not t.hasClass '.show-hidden'
+                    t = t.parents '.show-hidden'
+                lihidden = t.parents('ul').find '.field-hidden'
+                lihidden.show()
+                t.remove()
+
     include core/include_vote
 
 block content
