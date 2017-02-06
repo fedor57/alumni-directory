@@ -163,6 +163,7 @@ class FieldValue(Timestamped):
                               default=STATUS_TRUSTED, max_length=20)
     status_update_date = models.DateTimeField(
         'Дата обновления статуса', null=True, blank=True)
+    votes = models.IntegerField(default=0)
 
     objects = FieldValueManager()
 
@@ -185,50 +186,78 @@ class FieldValue(Timestamped):
     @classmethod
     def update_status(cls, target_id, field_name):
         votes = Counter()
-        values = {}
-        qs = cls.objects.filter(
-            target_id=target_id,
-            field_name=field_name
-        ).exclude(status=cls.STATUS_DELETED)
+        values = {}  # Экземпляры FieldValue
+        addts = {}  # timestamp последнего голоса
+        upts = {}  # timestamp последнего голоса
+        need_statuses = {}
 
-        fresh = qs.order_by('-timestamp').first()
+        qs = Vote.objects.filter(
+            field_value__target_id=target_id,
+            field_value__field_name=field_name,
+        ).select_related(
+            'field_value'
+        ).exclude(
+            field_value__status=cls.STATUS_DELETED,
+        ).order_by('-timestamp')
 
-        for i in qs.filter(votes__value__in=
-                           (Vote.VOTE_ADDED, Vote.VOTE_UP)) \
-                .annotate(cv=Count('votes')) \
-                .defer('id', 'status'):
-            values[i.pk] = i
-            votes[i.pk] += i.cv
-        for i in qs.filter(votes__value=Vote.VOTE_DOWN) \
-                .annotate(cv=Count('votes')) \
-                .defer('id', 'status'):
-            values[i.pk] = i
-            votes[i.pk] -= i.cv
+        last = None
+        for vote in qs.iterator():
+            pk = vote.field_value_id
+            values.setdefault(pk, vote.field_value)
+            if last is not None and \
+                    last.value == Vote.VOTE_TO_DEL and \
+                    vote.value == Vote.VOTE_ADDED:
+                need_statuses[pk] = FieldValue.STATUS_DELETED
+            elif vote.value == Vote.VOTE_ADDED:
+                addts.setdefault(pk, vote.timestamp)
+                votes[pk] += 1
+            elif vote.value == Vote.VOTE_UP:
+                upts.setdefault(pk, vote.timestamp)
+                votes[pk] += 1
+            elif vote.value == Vote.VOTE_DOWN:
+                votes[pk] -= 1
+            last = vote
 
-        votes = sorted(votes.items(), key=lambda v: v[1], reverse=True)
-        if len(votes) == 0:
-            return
-        first = values[votes[0][0]]
-        trusted = []
-        if first.timestamp > fresh.timestamp:
-            trusted.append(first.pk)
-        else:
-            trusted.append(fresh.pk)
-        for pk, c in votes:
-            f = values[pk]
-            if c < 0:
+        def get_max(x):
+            if x:
+                x = sorted(x.items(), key=lambda v: v[1], reverse=True)
+                return x[0]
+
+        vote_max = get_max(votes)
+        upts_max = get_max(upts)
+        addts_max = get_max(addts)
+
+        if not upts_max and not addts_max and vote_max:
+            need_statuses[vote_max[0]] = FieldValue.STATUS_TRUSTED
+        elif not upts_max:
+            need_statuses[addts_max[0]] = FieldValue.STATUS_TRUSTED
+        elif not addts_max and vote_max:
+            need_statuses[vote_max[0]] = FieldValue.STATUS_TRUSTED
+        elif addts_max[1] > upts_max[1] or addts_max[0] == upts_max[0]:
+            need_statuses[addts_max[0]] = FieldValue.STATUS_TRUSTED
+        elif vote_max:
+            need_statuses[vote_max[0]] = FieldValue.STATUS_TRUSTED
+
+        for pk, f in values.items():
+            if votes[pk] < 0:
                 need_status = FieldValue.STATUS_HIDDEN
-            elif fresh.field_name == cls.FIELD_LINK:
-                need_status = FieldValue.STATUS_TRUSTED
-            elif pk in trusted:
+            elif pk in need_statuses:
+                need_status = need_statuses[pk]
+            elif f.field_name == cls.FIELD_LINK:
                 need_status = FieldValue.STATUS_TRUSTED
             else:
                 need_status = FieldValue.STATUS_UNTRUSTED
 
+            update_fields = []
             if f.status != need_status:
                 f.status = need_status
                 f.status_update_date = timezone.now()
-                f.save(update_fields=['status', 'status_update_date'])
+                update_fields.extend(['status', 'status_update_date'])
+            if f.votes != votes[pk]:
+                f.votes = votes[pk]
+                update_fields.append('votes')
+            if update_fields:
+                f.save(update_fields=update_fields)
 
 
 class Vote(Timestamped):
@@ -236,7 +265,7 @@ class Vote(Timestamped):
     а также может быть голосованием за правильность или наличие ошибки
     """
     field_value = models.ForeignKey(
-        FieldValue, verbose_name='Поле', related_name='votes')
+        FieldValue, verbose_name='Поле')
     author_code = models.ForeignKey(
         AuthCode, verbose_name='Код автора голоса',
         related_name='votes', blank=True, null=True)

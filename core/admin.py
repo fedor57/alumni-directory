@@ -15,7 +15,7 @@ admin.site.register(Student)
 
 @admin.register(FieldValue)
 class AdminFieldValue(admin.ModelAdmin):
-    list_display = ('target', 'field_name', 'field_value', 'status')
+    list_display = ('target', 'field_name', 'field_value', 'status', 'votes')
 
 
 @admin.register(Vote)
