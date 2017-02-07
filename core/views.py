@@ -4,6 +4,7 @@ import itertools
 import operator
 
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.generic import TemplateView
@@ -51,6 +52,9 @@ def auth_code_login(request):
             if not created:
                 a.status = data['status']
                 a.save()
+            request.session['student_id'] = s.pk
+        elif 'student_id' in request.session:
+            del request.session['student_id']
         return HttpResponse(auth_code)
     if 'auth_code' in request.session:
         return HttpResponse()
@@ -324,8 +328,13 @@ def handle_vote(request, pk, vote_type):
         author_code = AuthCode.objects.get_by_code(auth_code)
         obj.author_code = author_code
 
-    obj.save()
-    return HttpResponseRedirect(
+    try:
+        obj.save()
+    except IntegrityError:
+        # Нарушено ограничение уникальности голоса
+        return HttpResponse(status=406)
+    else:
+        return HttpResponseRedirect(
         reverse('student-detail', kwargs={
             'pk': str(obj.field_value.target_id)}))
 
