@@ -1,15 +1,16 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-from collections import Counter, OrderedDict
+from collections import OrderedDict
 
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models.aggregates import Count
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.functional import cached_property
+
+from core.rules import get_statuses
 
 
 class Timestamped(models.Model):
@@ -187,11 +188,9 @@ class FieldValue(Timestamped):
 
     @classmethod
     def update_status(cls, target_id, field_name):
-        votes = Counter()
         values = {}  # Экземпляры FieldValue
-        addts = {}  # timestamp последнего голоса
-        upts = {}  # timestamp последнего голоса
         need_statuses = {}
+        l = []
 
         qs = Vote.objects.filter(
             field_value__target_id=target_id,
@@ -207,65 +206,48 @@ class FieldValue(Timestamped):
         for vote in qs.iterator():
             pk = vote.field_value_id
             author = vote.author_code
-
             values.setdefault(pk, vote.field_value)
-
-            is_me = target_id == author.owner_id
-            weight = 0.1  # вес голоса анонимуса
-            if not author:
-                pass  # Анонимный голос
-            elif author.status == AuthCode.STATUS_REVOKED:
-                if author.revoked_at and vote.timestamp < author.revoked_at:
-                    weight = author.trust_level
-                else:
-                    is_me = False  # "анонимизация"
-                    weight = 0.0  # Вес голоса невалидного кода
+            if not author or author.status == AuthCode.STATUS_NONEXISTENT:
+                valid = False
+                trust_level = None
+                is_me = False
             elif author.status == AuthCode.STATUS_VALID:
-                if is_me:
-                    weight = 1  # вес собственной правки
-                else:
-                    weight = author.trust_level
+                valid = True
+                trust_level = author.trust_level
+                is_me = target_id == author.owner_id
+            elif author.revoked_at and vote.timestamp < author.revoked_at:
+                valid = True
+                trust_level = author.trust_level
+                is_me = target_id == author.owner_id
+            else:
+                valid = False
+                trust_level = None
+                is_me = False
 
             if last is not None and \
                     last.value == Vote.VOTE_TO_DEL and \
                     vote.value == Vote.VOTE_ADDED:
                 need_statuses[pk] = FieldValue.STATUS_DELETED
-            elif vote.value == Vote.VOTE_ADDED:
-                addts.setdefault(pk, vote.timestamp)
-                votes[pk] += weight
-            elif vote.value == Vote.VOTE_UP:
-                upts.setdefault(pk, vote.timestamp)
-                votes[pk] += weight
-            elif vote.value == Vote.VOTE_DOWN:
-                votes[pk] -= weight
+            elif vote.value in (Vote.VOTE_ADDED, Vote.VOTE_UP):
+                l.append((pk, +1, valid, trust_level, is_me))
+            else:
+                l.append((pk, -1, valid, trust_level, is_me))
             last = vote
 
-        def get_max(x):
-            if x:
-                x = sorted(x.items(), key=lambda v: v[1], reverse=True)
-                return x[0]
-
-        vote_max = get_max(votes)
-        upts_max = get_max(upts)
-        addts_max = get_max(addts)
-
-        if not upts_max and not addts_max and vote_max:
-            need_statuses[vote_max[0]] = FieldValue.STATUS_TRUSTED
-        elif not upts_max:
-            need_statuses[addts_max[0]] = FieldValue.STATUS_TRUSTED
-        elif not addts_max and vote_max:
-            need_statuses[vote_max[0]] = FieldValue.STATUS_TRUSTED
-        elif addts_max[1] > upts_max[1] or addts_max[0] == upts_max[0]:
-            need_statuses[addts_max[0]] = FieldValue.STATUS_TRUSTED
-        elif vote_max:
-            need_statuses[vote_max[0]] = FieldValue.STATUS_TRUSTED
+        statuses = {}
+        votes = {}
+        for pk, status, vote in get_statuses(l):
+            votes[pk] = status
+            statuses[pk] = vote
 
         for pk, f in values.items():
-            if votes[pk] < 0:
+            if statuses[pk] is None:
                 need_status = FieldValue.STATUS_HIDDEN
             elif pk in need_statuses:
                 need_status = need_statuses[pk]
             elif f.field_name == cls.FIELD_LINK:
+                need_status = FieldValue.STATUS_TRUSTED
+            elif statuses[pk] is True:
                 need_status = FieldValue.STATUS_TRUSTED
             else:
                 need_status = FieldValue.STATUS_UNTRUSTED
