@@ -65,6 +65,7 @@ class AuthCode(models.Model):
         max_length=100, primary_key=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     owner = models.ForeignKey('Student', null=True)
+    cross_name = models.CharField(max_length=200)
     updated_at = models.DateTimeField('Дата обновления данных', auto_now=True)
     revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
     trust_level = models.FloatField('Уровень доверия', default=1)
