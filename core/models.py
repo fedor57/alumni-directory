@@ -67,6 +67,7 @@ class AuthCode(models.Model):
     owner = models.ForeignKey('Student', null=True)
     updated_at = models.DateTimeField('Дата обновления данных', auto_now=True)
     revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
+    trust_level = models.FloatField('Уровень доверия', default=1)
 
     class Meta:
         verbose_name = 'код авторизации'
@@ -195,7 +196,8 @@ class FieldValue(Timestamped):
             field_value__target_id=target_id,
             field_value__field_name=field_name,
         ).select_related(
-            'field_value'
+            'field_value',
+            'author_code',
         ).exclude(
             field_value__status=cls.STATUS_DELETED,
         ).order_by('-timestamp')
@@ -203,19 +205,38 @@ class FieldValue(Timestamped):
         last = None
         for vote in qs.iterator():
             pk = vote.field_value_id
+            author = vote.author_code
+
             values.setdefault(pk, vote.field_value)
+
+            is_me = target_id == author.owner_id
+            weight = 0.1  # вес голоса анонимуса
+            if not author:
+                pass  # Анонимный голос
+            elif author.status == AuthCode.STATUS_REVOKED:
+                if author.revoked_at and vote.timestamp < author.revoked_at:
+                    weight = author.trust_level
+                else:
+                    is_me = False  # "анонимизация"
+                    weight = 0.0  # Вес голоса невалидного кода
+            elif author.status == AuthCode.STATUS_VALID:
+                if is_me:
+                    weight = 1  # вес собственной правки
+                else:
+                    weight = author.trust_level
+
             if last is not None and \
                     last.value == Vote.VOTE_TO_DEL and \
                     vote.value == Vote.VOTE_ADDED:
                 need_statuses[pk] = FieldValue.STATUS_DELETED
             elif vote.value == Vote.VOTE_ADDED:
                 addts.setdefault(pk, vote.timestamp)
-                votes[pk] += 1
+                votes[pk] += weight
             elif vote.value == Vote.VOTE_UP:
                 upts.setdefault(pk, vote.timestamp)
-                votes[pk] += 1
+                votes[pk] += weight
             elif vote.value == Vote.VOTE_DOWN:
-                votes[pk] -= 1
+                votes[pk] -= weight
             last = vote
 
         def get_max(x):
@@ -285,7 +306,7 @@ class Vote(Timestamped):
     class Meta:
         verbose_name = 'голос'
         verbose_name_plural = 'голоса'
-        unique_together = ('field_value', 'author_code')
+        unique_together = ('field_value', 'author_code', 'value')
 
     def __unicode__(self):
         return self.field_value.field_value
