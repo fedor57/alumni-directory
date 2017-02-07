@@ -166,7 +166,7 @@ class FieldValue(Timestamped):
                               default=STATUS_TRUSTED, max_length=20)
     status_update_date = models.DateTimeField(
         'Дата обновления статуса', null=True, blank=True)
-    votes = models.IntegerField(default=0)
+    votes = models.FloatField(default=0)
 
     objects = FieldValueManager()
 
