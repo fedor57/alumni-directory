@@ -64,7 +64,7 @@ class AuthCode(models.Model):
         validators=[RegexValidator(r'^[^\s]+$')],
         max_length=100, primary_key=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    owner_name = models.CharField(max_length=200)
+    owner = models.ForeignKey('Student', null=True)
     updated_at = models.DateTimeField('Дата обновления данных', auto_now=True)
     revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
 
@@ -75,7 +75,7 @@ class AuthCode(models.Model):
     objects = AuthCodeManager()
 
     def __unicode__(self):
-        return '%s (%s)' % (self.code, self.owner_name)
+        return '%s (%s)' % (self.code, self.owner)
 
 
 class Student(Timestamped):
@@ -91,7 +91,7 @@ class Student(Timestamped):
         verbose_name_plural = 'выпускники'
 
     def __unicode__(self):
-        return '%s (%s)' % (self.name, self.main_grade)
+        return '%s %s' % (self.name, self.main_grade)
 
     def get_absolute_url(self):
         return reverse('student-detail', args=[str(self.id)])
