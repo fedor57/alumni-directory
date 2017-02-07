@@ -23,6 +23,7 @@ def get_data(auth_code):
     """ Метод получающий данные из сервиса авторизации"""
     return {  # Заглушка
         'full_name': 'Заглушкова Заглушка',
+        'cross_name': 'Заглушкова Заглушка 1890A',
         'year': 1890,
         'letter': 'А',
         'status': 'valid'
@@ -35,24 +36,34 @@ def auth_code_login(request):
         request.session['auth_code'] = auth_code
         if auth_code:  # иначе анонимус
             data = get_data(auth_code)
-            g, created = Grade.objects.get_or_create(
+            g = Grade.objects.filter(
                 graduation_year=data['year'],
                 letter=data['letter'],
-            )
-            s, created = Student.objects.get_or_create(
-                name=data['full_name'],
-                main_grade_id=g.pk,
-            )
+            ).first()
+            if g:
+                s = Student.objects.filter(
+                    name=data['full_name'],
+                    main_grade_id=g.pk,
+                ).first()
+            else:
+                s = None
+            defaults = {
+                'owner': s,
+                'cross_name': data['cross_name'],
+                'status': data['status'],
+            }
+            if s:
+                defaults['owner_id'] = s.pk
             a, created = AuthCode.objects.get_or_create(
-                code=auth_code,
-                defaults={
-                    'owner': s,
-                    'status': data['status'],
-                })
+                code=auth_code, defaults=defaults)
             if not created:
                 a.status = data['status']
+                a.cross_name = data['cross_name']
+                if s:
+                    a.owner_id = s.pk
                 a.save()
-            request.session['student_id'] = s.pk
+            if s:
+                request.session['student_id'] = s.pk
         elif 'student_id' in request.session:
             del request.session['student_id']
         return HttpResponse(auth_code)
