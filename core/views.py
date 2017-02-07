@@ -18,10 +18,40 @@ from .models import Grade, Student, FieldValue, AuthCode, Vote
 from .forms import StudentCreateForm, FieldValueForm, SendMailForm
 
 
+def get_data(auth_code):
+    """ Метод получающий данные из сервиса авторизации"""
+    return {  # Заглушка
+        'full_name': 'Заглушкова Заглушка',
+        'year': 1890,
+        'letter': 'А',
+        'status': 'valid'
+    }
+
+
 def auth_code_login(request):
     if request.method == 'POST':
-        request.session['auth_code'] = request.POST.get('auth_code', '')
-        return HttpResponse(request.POST.get('auth_code', ''))
+        auth_code = request.POST.get('auth_code', '')
+        request.session['auth_code'] = auth_code
+        if auth_code:  # иначе анонимус
+            data = get_data(auth_code)
+            g, created = Grade.objects.get_or_create(
+                graduation_year=data['year'],
+                letter=data['letter'],
+            )
+            s, created = Student.objects.get_or_create(
+                name=data['full_name'],
+                main_grade_id=g.pk,
+            )
+            a, created = AuthCode.objects.get_or_create(
+                code=auth_code,
+                defaults={
+                    'owner': s,
+                    'status': data['status'],
+                })
+            if not created:
+                a.status = data['status']
+                a.save()
+        return HttpResponse(auth_code)
     if 'auth_code' in request.session:
         return HttpResponse()
     return HttpResponse(status=403)
