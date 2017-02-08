@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
+from django.template.loader import render_to_string
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -362,9 +363,15 @@ class SendMailView(CreateView):
         except FieldValue.objects.DoesNotExist:
             return Http404()
 
+        message = render_to_string(
+            'mail.txt', {
+                'message': form.cleaned_data['message'],
+                'author_code': self.get_object().author_code,
+            })
+
         send_mail(
             form.cleaned_data['subject'],
-            form.cleaned_data['message'],
+            message,
             None,
             [email],
         )
