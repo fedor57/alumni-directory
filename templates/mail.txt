@@ -1,0 +1,4 @@
+{{ message }}
+
+________
+Отправитель {{ author_code.cross_name }}

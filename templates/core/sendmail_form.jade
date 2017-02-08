@@ -7,5 +7,7 @@ form#sendmail(action="{% url 'field-sendmail' pk=field_email.pk %}", method="pos
   .form-group
     label Тело сообщения
     textarea.form-control(name='message', rows="3", required='required')
+      | Привет!
+      | Шаблон
 
   button.btn.btn-default(type='submit') Отправить
