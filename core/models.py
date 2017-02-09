@@ -289,7 +289,8 @@ class Vote(Timestamped):
     class Meta:
         verbose_name = 'голос'
         verbose_name_plural = 'голоса'
-        unique_together = ('field_value', 'author_code', 'value')
+        # Плохо работает для анонимусов
+        # unique_together = ('field_value', 'author_code', 'value')
 
     def __unicode__(self):
         return self.field_value.field_value

@@ -321,7 +321,7 @@ def handle_vote(request, pk, vote_type):
     if request.method != 'POST':
         return HttpResponseBadRequest()
     obj = Vote()
-    
+
     # Идентификатор значения FieldValue
     try:
         obj.field_value = FieldValue.objects.get(id=pk)
@@ -340,13 +340,14 @@ def handle_vote(request, pk, vote_type):
         author_code = AuthCode.objects.get_by_code(auth_code)
         obj.author_code = author_code
 
-    try:
-        obj.save()
-    except IntegrityError:
-        # Нарушено ограничение уникальности голоса
-        return HttpResponse(status=406)
-    else:
-        return HttpResponseRedirect(
+        if Vote.objects.filter(
+                field_value_id=obj.field_value.pk,
+                value=obj.value,
+                author_code_id=obj.author_code.pk).exists():
+            return HttpResponse(status=406)
+
+    obj.save()
+    return HttpResponseRedirect(
         reverse('student-detail', kwargs={
             'pk': str(obj.field_value.target_id)}))
 
