@@ -237,8 +237,8 @@ class FieldValue(Timestamped):
         statuses = {}
         votes = {}
         for pk, status, vote in get_statuses(l):
-            votes[pk] = status
-            statuses[pk] = vote
+            votes[pk] = vote
+            statuses[pk] = status
 
         for pk, f in values.items():
             if statuses[pk] is None:
