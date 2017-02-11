@@ -50,7 +50,7 @@
           </ul>
           <form class="navbar-form navbar-left" action="{% url 'student-list' %}">
             <div class="form-group">
-              <input name="query" type="text"
+              <input name="query" type="text" autocomplete="off"
                      class="suggest-students form-control"
                      value="{{ request.GET.query }}">
             </div>
