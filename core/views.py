@@ -4,6 +4,7 @@ import itertools
 import operator
 import re
 
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import JsonResponse
@@ -385,7 +386,7 @@ class SendMailView(CreateView):
         send_mail(
             form.cleaned_data['subject'],
             message,
-            None,
+            settings.EMAIL_FROM,
             [email],
         )
 
