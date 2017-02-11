@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 import itertools
 import operator
+import re
 
 from django.core.mail import send_mail
-from django.db import IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -18,6 +18,9 @@ from django.urls import reverse
 
 from .models import Grade, Student, FieldValue, AuthCode, Vote
 from .forms import StudentCreateForm, FieldValueForm, SendMailForm
+
+
+re_search = re.compile(r'\w{2,}', re.U)
 
 
 def get_data(auth_code):
@@ -130,10 +133,19 @@ class StudentListView(BaseStudentListView):
         qs = super(StudentListView, self).get_queryset()
         query = self.request.GET.get('query')
         if query:
-            q = Q(modifications__field_value__icontains=query)
-            q &= ~Q(modifications__status=FieldValue.STATUS_DELETED)
-            q |= Q(name__icontains=query)
-            qs = qs.filter(q).distinct()
+            qfv = []
+            qname = []
+            for i in re_search.findall(query):
+                qfv.append(Q(modifications__field_value__icontains=i))
+                qname.append(Q(name__icontains=i))
+            qs = qs.exclude(
+                modifications__status=FieldValue.STATUS_DELETED
+            )
+            if qfv and qname:
+                qs = qs.filter(
+                    reduce(operator.and_, qfv) | reduce(operator.and_, qname)
+                )
+            qs = qs.distinct()
         elif self.char:
             qs = qs.filter(name__startswith=self.char)
         elif self.grade_id:
@@ -171,7 +183,7 @@ class SuggestListView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('query', '')
-        self.query = query.split()
+        self.query = re_search.findall(query)
 
         qs = super(SuggestListView, self).get_queryset()
 
