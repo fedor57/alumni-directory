@@ -26,7 +26,7 @@
     <![endif]-->
   </head>
   <body>
-    <nav class="navbar navbar-default navbar-static-top">
+    <nav class="navbar navbar-default navbar-inverse navbar-static-top">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -36,16 +36,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Школа №57</a>
+          <a class="navbar-brand" href="/">Выпускники 57—директория</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             {% block nav %}
-              <li><a href="/">Выпускники</a></li>
-              <li><a href="{% url 'alphabet-list' %}">Алфавитный указатель</a></li>
-              <li><a href="{% url 'student-create' %}">Добавить</a></li>
+              <li><a href="/">Классы выпуска</a></li>
+              <li><a href="{% url 'alphabet-list' %}">По алфавиту</a></li>
             {% endblock %}
           </ul>
           <form class="navbar-form navbar-left" action="{% url 'student-list' %}">
@@ -57,6 +56,7 @@
             <button type="submit" class="btn btn-default">Поиск</button>
           </form>
           <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'student-create' %}">Добавить выпускника</a></li>
             <li><a id="btn-login" href="#" data-toggle="modal" data-target="#modal-login">
                     Вход
                 </a>
