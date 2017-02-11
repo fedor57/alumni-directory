@@ -9,10 +9,23 @@ from .models import (
     Vote,
 )
 
-admin.site.register(Grade)
 admin.site.register(AuthCode)
-admin.site.register(Student)
-admin.site.register(Teachers)
+
+
+class InlineTeacher(admin.TabularInline):
+    model = Teachers
+
+
+class InlineStudent(admin.TabularInline):
+    model = Student
+    exclude = ('creator_code', )
+    readonly_fields = ('import_date', )
+
+
+@admin.register(Grade)
+class AdminGrade(admin.ModelAdmin):
+    list_display = ('graduation_year', 'letter')
+    inlines = [InlineTeacher, InlineStudent]
 
 
 @admin.register(FieldValue)
