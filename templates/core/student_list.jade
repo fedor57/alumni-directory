@@ -129,6 +129,12 @@ block content
             - else
               | {{ group }}
 
+          - if group.is_grade
+            - for t in group.teachers.all
+              p
+                b {{ t.role }}
+                |  {{ t.content }}
+
           .row
             - for student in students
               .col-sm-6.student(data-href="{% url 'student-detail' pk=student.id %}")

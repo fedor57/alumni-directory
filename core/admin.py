@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     Grade,
     AuthCode,
+    Teachers,
     Student,
     FieldValue,
     Vote,
@@ -11,6 +12,7 @@ from .models import (
 admin.site.register(Grade)
 admin.site.register(AuthCode)
 admin.site.register(Student)
+admin.site.register(Teachers)
 
 
 @admin.register(FieldValue)

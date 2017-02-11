@@ -301,3 +301,18 @@ class Vote(Timestamped):
             self.field_value.target_id,
             self.field_value.field_name,
         )
+
+
+class Teachers(models.Model):
+    grade = models.ForeignKey(Grade, related_name='teachers')
+    role = models.CharField(max_length=512)
+    content = models.TextField()
+    torder = models.SmallIntegerField()
+
+    class Meta:
+        verbose_name = 'учителя'
+        verbose_name_plural = 'учителя'
+        ordering = ('torder', )
+
+    def __unicode__(self):
+        return ' '.join([self.role, self.content])
