@@ -88,6 +88,7 @@ class Student(Timestamped):
     name = models.CharField(max_length=200)
     main_grade = models.ForeignKey(Grade)
     creator_code = models.ForeignKey(AuthCode, blank=True, null=True)
+    import_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'выпускник'
