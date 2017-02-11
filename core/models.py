@@ -25,9 +25,9 @@ class Grade(models.Model):
     Класс
     """
     is_grade = True
-    letter = models.CharField(max_length=1)
-    graduation_year = models.PositiveSmallIntegerField()  # TODO: вылидировать год
-    # TODO: добавить читаемый id
+    profile = models.CharField('Тип класса', max_length=50, blank=True, null=True)
+    letter = models.CharField('Буква выпускного класса', max_length=1)
+    graduation_year = models.PositiveSmallIntegerField('Год выпуска')
 
     class Meta:
         verbose_name = 'класс'
