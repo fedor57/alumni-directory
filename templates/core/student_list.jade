@@ -136,7 +136,7 @@ block content
               | {{ group }}
 
           - if group.is_grade and show_teachers
-            h2 {{ group.profile }}
+            h2 {{ group.profile|default:"" }}
             - for t in group.teachers.all
               p
                 b {{ t.role }}
