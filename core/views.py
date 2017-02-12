@@ -161,8 +161,8 @@ class StudentListView(BaseStudentListView):
         context_data = super(StudentListView, self).get_context_data(**kwargs)
         if self.grade_id:
             context_data['grade'] = Grade.objects.get(id=self.grade_id)
-        if self.request.GET.get('query'):
-            context_data['show_teachers'] = False
+        if not self.request.GET.get('query'):
+            context_data['show_teachers'] = True
         context_data['year'] = self.year
         context_data['char'] = self.char
         res = []
