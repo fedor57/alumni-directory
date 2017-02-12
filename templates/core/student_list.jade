@@ -129,7 +129,7 @@ block content
             - else
               | {{ group }}
 
-          - if group.is_grade
+          - if group.is_grade and show_teachers
             h2 {{ group.profile }}
             - for t in group.teachers.all
               p
