@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='grade',
             name='profile',
-            field=models.CharField(blank=True, max_length=50, verbose_name='\u0422\u0438\u043f \u043a\u043b\u0430\u0441\u0441\u0430'),
+            field=models.CharField(blank=True, null=True, max_length=50, verbose_name='\u0422\u0438\u043f \u043a\u043b\u0430\u0441\u0441\u0430'),
         ),
         migrations.AlterField(
             model_name='grade',
