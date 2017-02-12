@@ -2,16 +2,14 @@
 form#from-add-fact.row(action="{% url 'student-value-create' pk=object.pk %}", method="post")
   - csrf_token
   .col-sm-5.form-group
-    label Тип факта
-    select#field-name.form-control(name='field_name')
+    select#field-name.form-control(name='field_name' style='display: inline-block; width: 95%')
       - for val, verb, descr in field_types
         option(value='{{ val }}', data-descr='{{ descr }}') {{ verb }}
+    div(style='display: inline-block; margin-left: 10px; font-size: 120%') :
   .col-sm-5.form-group
-    label Значение
     input.suggest.form-control(name='field_value', type='text',
                                required='required')
   .col-sm-2.form-group
-    label &nbsp;
     button.btn.btn-default.form-control(type='submit') Добавить факт
 
 p#field-descr
