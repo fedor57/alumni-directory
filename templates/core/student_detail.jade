@@ -45,41 +45,44 @@ block content
     .tab-content
       #tab-student.tab-pane.active(role='tabpanel')
         br
-        - for field, modifications in grouped_modifications.items
-          p {{ modifications.0.get_field_name_display }}
+        - if grouped_modifications.items
+          - for field, modifications in grouped_modifications.items
+            p {{ modifications.0.get_field_name_display }}
 
-          ul
-            - for modification in modifications
-              li(class="
-                {% if modification.status == 'trusted' %}field-trusted{% else %}
-                    {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
-                {% endif %}")
-                - if modification.field_name == 'social_vk'
-                    a(href="{{ modification.field_value }}")
-                        | {{ modification.field_value }}
-                - elif modification.field_name == 'social_fb'
-                    a(href="{{ modification.field_value }}")
-                        | {{ modification.field_value }}
-                - elif modification.field_name == 'link'
-                    a(href="{{ modification.field_value }}")
-                        | {{ modification.field_value }}
-                - elif modification.field_name == 'email'
-                    a e-mail скрыт
-                - else
-                    {{ modification.field_value }}
-                - if modification.field_name != 'email'
-                  span.vote-panel
-                    | &nbsp
-                    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}")
-                      span.glyphicon.glyphicon-ok-circle
-                    | &nbsp
-                    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}")
-                      span.glyphicon.glyphicon-remove-circle
-                    | &nbsp
-                    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
-                      span.glyphicon.glyphicon-ban-circle
-            li.show-hidden
-              a ...
+            ul
+              - for modification in modifications
+                li(class="
+                  {% if modification.status == 'trusted' %}field-trusted{% else %}
+                      {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
+                  {% endif %}")
+                  - if modification.field_name == 'social_vk'
+                      a(href="{{ modification.field_value }}")
+                          | {{ modification.field_value }}
+                  - elif modification.field_name == 'social_fb'
+                      a(href="{{ modification.field_value }}")
+                          | {{ modification.field_value }}
+                  - elif modification.field_name == 'link'
+                      a(href="{{ modification.field_value }}")
+                          | {{ modification.field_value }}
+                  - elif modification.field_name == 'email'
+                      a e-mail скрыт
+                  - else
+                      {{ modification.field_value }}
+                  - if modification.field_name != 'email'
+                    span.vote-panel
+                      | &nbsp
+                      a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}")
+                        span.glyphicon.glyphicon-ok-circle
+                      | &nbsp
+                      a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}")
+                        span.glyphicon.glyphicon-remove-circle
+                      | &nbsp
+                      a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
+                        span.glyphicon.glyphicon-ban-circle
+              li.show-hidden
+                a ...
+        - else
+          | Пока нет данных о профиле
 
       #tab-send.tab-pane(role='tabpanel')
         br
@@ -87,7 +90,7 @@ block content
           - with field_email=grouped_modifications.email.0
             include core/sendmail_form
         - else
-          p Нет данных о e-mail
+          p Пока нет адреса email
           p
             a.add-field(href="#", data-feild-type='email') Добавить
       #tab-fb.tab-pane(role='tabpanel')
@@ -98,7 +101,7 @@ block content
               a(href="{{ modif.field_value }}")
                 | {{ modif.field_value }}
         - else
-          p Нет данных о социальной сети
+          p Пока нет данных о социальной сети
         p
           a.add-field(href="#", data-feild-type='social_fb') Добавить
       #tab-vk.tab-pane(role='tabpanel')
@@ -109,7 +112,7 @@ block content
               a(href="{{ modif.field_value }}")
                 | {{ modif.field_value }}
         - else
-          p Нет данных о социальной сети
+          p Пока нет данных о социальной сети
         p
           a.add-field(href="#", data-feild-type='social_vk') Добавить
       #tab-add.tab-pane(role='tabpanel')
