@@ -3,7 +3,6 @@ extends 'core/base.html'
 
 block scripts
     style.
-      .modal-body .close {display: none;}
       .modal-footer .btn-cls {display: none;}
       .value-badge {
         background: #eee;
@@ -91,6 +90,11 @@ block scripts
                 lihidden = t.parents('ul').find '.field-hidden'
                 lihidden.show()
                 t.remove()
+
+            nav.on 'click', '.close', (e) ->
+                e.preventDefault()
+                nav.slideUp()
+
 
     include core/include_vote
 
