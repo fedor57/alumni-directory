@@ -41,6 +41,8 @@ block scripts
                     if !!callback
                         callback()
                     nav.slideDown()
+                    field_name = nav.find '#field-name'
+                    field_name.change()
                     suggest = nav.find '.suggest'
                     url = '{% url "suggest-list" %}'
                     suggest.typeahead
