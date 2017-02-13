@@ -4,14 +4,18 @@
       .modal-header
         button.close(type='button', data-dismiss='modal', aria-label='Close')
           span(aria-hidden='true') ×
-        h4.modal-title Авторизация
+        h4.modal-title Представьтесь, пожалуйста
       .modal-body
         form(action="{% url 'api-login' %}", method="post")
           .form-group
+            p.
+              Для полноценного учета введенной вами информации, вам нужно ввести "код выпускника".
+              Подробней о кодах на #[a(href="http://auth.alumni57.ru") http://auth.alumni57.ru].
+              Анонимные правки потребуют подтверждения от других выпусников перед публикацией.
             p#login-error.bg-danger Введите правильный код
           - csrf_token
           .form-group
-            label Код аутентификации
+            label Код выпускника
             input.form-control(name='auth_code', type='text', required='required', value='{{ request.session.auth_code|default:"" }}')
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Закрыть
@@ -27,8 +31,10 @@
         auth_ptrn = /\w[\w-]+-\d{5,}$/
         auth_code = '{{ request.session.auth_code|default:"" }}'
 
+        login_error.hide()
+
         rend_auth_code = (auth_code) ->
-            auth_code = auth_code.replace /(-)\d+(\d{4})$/, '$1XXXXXXXXXXX$2'
+            auth_code = auth_code.replace /(-)\d+(\d{4})$/, '$1xxxxxxxxxxx$2'
             $('#btn-login').text auth_code
 
         if auth_code.length
