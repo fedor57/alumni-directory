@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import itertools
 import operator
 import re
+import requests
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -26,13 +27,15 @@ re_search = re.compile(r'\w{2,}', re.U)
 
 def get_data(auth_code):
     """ Метод получающий данные из сервиса авторизации"""
-    return {  # Заглушка
-        'full_name': 'Заглушкова Заглушка',
-        'cross_name': 'Заглушкова Заглушка 1890A',
-        'year': 1890,
-        'letter': 'А',
-        'status': 'valid'
-    }
+    r = requests.post("http://auth.alumni57.ru/api/v1/check_code", data={'code': auth_code})
+    return r.json()
+    #return {  # Заглушка
+    #    'full_name': 'Заглушкова Заглушка',
+    #    'cross_name': 'Заглушкова Заглушка 1890A',
+    #    'year': 1890,
+    #    'letter': 'А',
+    #    'status': 'valid'
+    #}
 
 
 def auth_code_login(request):
