@@ -16,7 +16,7 @@
           - csrf_token
           .form-group
             label Код выпускника
-            input.form-control(name='auth_code', type='text', required='required', value='{{ request.session.auth_code|default:"" }}')
+            input.form-control(name='auth_code', type='text', required='required', value='{{ request.session.display_code|default:"" }}')
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Закрыть
         button#btn-login.btn.btn-primary(type='button') Войти
@@ -29,12 +29,12 @@
         key_auth = 'is_auth'
         login_error = $('#login-error')
         auth_ptrn = /\w[\w-]+-\d{5,}$/
-        auth_code = '{{ request.session.auth_code|default:"" }}'
+        auth_code = '{{ request.session.display_code|default:"" }}'
 
         login_error.hide()
 
         rend_auth_code = (auth_code) ->
-            auth_code = auth_code.replace /(-)\d+(\d{4})$/, '$1xxxxxxxxxxx$2'
+            # auth_code = auth_code.replace /(-)\d+(\d{4})$/, '$1xxxxxxxxxxx$2'
             $('#btn-login').text auth_code
 
         if auth_code.length
@@ -60,6 +60,7 @@
             login_error.hide()
 
             $.post form.prop('action'), form.serialize(), (data) ->
+                form.find('[name="auth_code"]').val(data)
                 if not data.length
                     data = 'Вход'
                 rend_auth_code data

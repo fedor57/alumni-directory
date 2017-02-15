@@ -28,7 +28,12 @@ re_search = re.compile(r'\w{2,}', re.U)
 def get_data(auth_code):
     """ Метод получающий данные из сервиса авторизации"""
     r = requests.post("http://auth.alumni57.ru/api/v1/check_code", data={'code': auth_code})
-    return r.json()
+    data = r.json()
+    if data['status'] == 'ok':
+        data['status'] = 'valid'
+    if data['status'] == 'disabled':
+        data['status'] = 'revoked'
+    return data
     #return {  # Заглушка
     #    'full_name': 'Заглушкова Заглушка',
     #    'cross_name': 'Заглушкова Заглушка 1890A',
@@ -37,11 +42,19 @@ def get_data(auth_code):
     #    'status': 'valid'
     #}
 
+def escape_code(code):
+    if code:
+        fragments = code.split('-')
+        fragments[-1] = 'x' * (len(fragments[-1]) - 4) + fragments[-1][-4:]
+        return '-'.join(fragments)
+    return code
+
 
 def auth_code_login(request):
     if request.method == 'POST':
         auth_code = request.POST.get('auth_code', '')
         request.session['auth_code'] = auth_code
+        request.session['display_code'] = escape_code(auth_code)
         if auth_code:  # иначе анонимус
             data = get_data(auth_code)
             g = Grade.objects.filter(
@@ -59,6 +72,7 @@ def auth_code_login(request):
                 'owner': s,
                 'cross_name': data['cross_name'],
                 'status': data['status'],
+                'revoked_at': data['disabled_at'],
             }
             if s:
                 defaults['owner_id'] = s.pk
@@ -67,6 +81,7 @@ def auth_code_login(request):
             if not created:
                 a.status = data['status']
                 a.cross_name = data['cross_name']
+                a.revoked_at = data['disabled_at']
                 if s:
                     a.owner_id = s.pk
                 a.save()
@@ -74,7 +89,7 @@ def auth_code_login(request):
                 request.session['student_id'] = s.pk
         elif 'student_id' in request.session:
             del request.session['student_id']
-        return HttpResponse(auth_code)
+        return HttpResponse(request.session['display_code'])
     if 'auth_code' in request.session:
         return HttpResponse()
     return HttpResponse(status=403)
