@@ -12,14 +12,14 @@
               Для полноценного учета введенной вами информации, вам нужно ввести "код выпускника".
               Подробней о кодах на #[a(href="http://auth.alumni57.ru") http://auth.alumni57.ru].
               Анонимные правки потребуют подтверждения от других выпусников перед публикацией.
-            p#login-error.bg-danger Введите правильный код
+            p#login-error.bg-danger
           - csrf_token
           .form-group
             label Код выпускника
             input.form-control(name='auth_code', type='text', required='required', value='{{ request.session.display_code|default:"" }}')
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Закрыть
-        button#btn-login.btn.btn-primary(type='button') Войти
+        input#btn-login.btn.btn-primary(type='submit' value='Войти')
         button#btn-anon.btn.btn-default(type='button') Анонимно
 
 :coffeescript
@@ -55,11 +55,12 @@
         sendForm = ->
             code = form.find('[name="auth_code"]').val()
             if code.length > 0 and !auth_ptrn.test(code)
+                login_error.html('Неверный формат. Код должен быть формата 57-1971a-marn-1234567890')
                 login_error.show()
                 return
             login_error.hide()
 
-            $.post form.prop('action'), form.serialize(), (data) ->
+            $.post(form.prop('action'), form.serialize(), (data) ->
                 form.find('[name="auth_code"]').val(data)
                 if not data.length
                     data = 'Вход'
@@ -68,6 +69,19 @@
                 modal.modal 'hide'
                 if !!modal.callback
                     modal.callback()
+            ).fail( (xhr, _, __) ->
+                if xhr.status == 404
+                    login_error.html('Такой код не зарегистрирован')
+                    login_error.show()
+                if xhr.status == 403
+                    login_error.html('Указанный код заблокирован')
+                    login_error.show()
+            )
+
+        form.on 'submit', (e) ->
+            e.preventDefault()
+            sendForm()
+            return false
 
         modal.on 'click', '#btn-login', sendForm
 

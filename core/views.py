@@ -57,6 +57,12 @@ def auth_code_login(request):
         request.session['display_code'] = escape_code(auth_code)
         if auth_code:  # иначе анонимус
             data = get_data(auth_code)
+            if data['status'] != 'valid':
+                del request.session['auth_code']
+                del request.session['display_code']
+                if data['status'] == 'not_found':
+                    return HttpResponse(status=404)
+                return HttpResponse(status=403)
             g = Grade.objects.filter(
                 graduation_year=data['year'],
                 letter=data['letter'],
