@@ -3,6 +3,7 @@ form#from-add-fact.row(action="{% url 'student-value-create' pk=object.pk %}", m
   - csrf_token
   .col-sm-5.form-group
     select#field-name.form-control(name='field_name' style='display: inline-block; width: 95%')
+      option.empty-value -- Выберите факт --
       - for val, verb, descr in field_types
         option(value='{{ val }}', data-descr='{{ descr }}') {{ verb }}
     div(style='display: inline-block; margin-left: 10px; font-size: 120%') :
@@ -10,6 +11,6 @@ form#from-add-fact.row(action="{% url 'student-value-create' pk=object.pk %}", m
     input.suggest.form-control(name='field_value', type='text',
                                required='required')
   .col-sm-2.form-group
-    button.btn.btn-default.form-control(type='submit') Добавить факт
+    button.btn.btn-default.form-control(type='submit' disabled='disabled') Добавить факт
 
-p#field-descr
+p#field-descr(style="font-style:italic")

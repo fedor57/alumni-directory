@@ -82,6 +82,10 @@ block scripts
             nav.on 'change', '#field-name', (e) ->
                 t = $ e.target
                 option = t.find ':selected'
+                if option.hasClass('empty-value')
+                    nav.find('button[type=submit]').attr('disabled', 'disabled')
+                else
+                    nav.find('button[type=submit]').removeAttr('disabled')
                 $('#field-descr').text option.data('descr')
             nav.on 'submit', '#sendmail', send_form
 
