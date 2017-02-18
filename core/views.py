@@ -161,11 +161,11 @@ class StudentListView(BaseStudentListView):
             qfv = []
             qname = []
             for i in re_search.findall(query):
-                qfv.append(Q(modifications__field_value__icontains=i))
+                qfv.append(
+                    Q(modifications__field_value__icontains=i) &
+                    ~Q(modifications__status=FieldValue.STATUS_DELETED)
+                )
                 qname.append(Q(name__icontains=i))
-            qs = qs.exclude(
-                modifications__status=FieldValue.STATUS_DELETED
-            )
             if qfv and qname:
                 qs = qs.filter(
                     reduce(operator.and_, qfv) | reduce(operator.and_, qname)
