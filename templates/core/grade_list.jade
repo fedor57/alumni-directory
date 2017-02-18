@@ -2,11 +2,16 @@ extends 'core/base.html'
 
 block content
 
-    p.lead
-        Обновляемый список выпускников школы 57 г. Москвы с краткими контактами.
-        Если вы учились в 57 школе и можете дополнить информацию про себя или одноклассников, будьте добры, потратьте немного времени.
-        Голосуйте за или против правок, если у вас есть более точная информация.
-        Авторизуйтесь кодом выпускника (#[a(href="http://auth.alumni57.ru") auth.alumni57.ru]), чтобы вашей информации больше доверяли.
+    #show_info.hidden
+        a.btn.btn-default.btn-lg Что это?
+
+    #about_info.jumbotron
+        p.lead
+            Обновляемый список выпускников школы 57 г. Москвы с краткими контактами.
+            Если вы учились в 57 школе и можете дополнить информацию про себя или одноклассников, будьте добры, потратьте немного времени.
+            Голосуйте за или против правок, если у вас есть более точная информация.
+            Авторизуйтесь #[a(href="http://auth.alumni57.ru") кодом выпускника], чтобы вашей информации больше доверяли.
+        a#close_info.btn.btn-primary.btn-lg(role="button") Закрыть
 
     - for g, l in grades
         article
@@ -18,3 +23,24 @@ block content
                     | &nbsp;
                     a(href="{% url 'student-list' %}?grade_id={{ i.pk }}")
                         | {{ i.letter }}
+
+    :coffeescript
+        $ ->
+            about_info = $('#about_info')
+            close_info = $('#close_info')
+            show_info = $('#show_info')
+
+            c = getCookie('__hide_info')
+            if c == '1'
+                show_info.removeClass('hidden')
+                about_info.addClass('hidden')
+
+            close_info.on 'click', ->
+                show_info.removeClass('hidden')
+                about_info.addClass('hidden')
+                setCookie('__hide_info', 1, 31)
+
+            show_info.on 'click', ->
+                show_info.addClass('hidden')
+                about_info.removeClass('hidden')
+                setCookie('__hide_info', 0, 31)

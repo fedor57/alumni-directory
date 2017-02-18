@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>{% block title %}Школа №57 города Москвы{% endblock %}</title>
+    <title>{% block title %}Выпускники 57 — директория{% endblock %}</title>
 
     <!-- Bootstrap -->
     <!-- Latest compiled and minified CSS -->
@@ -36,7 +36,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Выпускники 57—директория</a>
+          <a class="navbar-brand" href="/">Выпускники 57 — директория</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -87,6 +87,15 @@
             }
         }
         return cookieValue;
+    }
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
     }
     </script>
 
