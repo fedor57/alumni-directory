@@ -45,6 +45,7 @@
             {% block nav %}
               <li><a href="/">Классы выпуска</a></li>
               <li><a href="{% url 'alphabet-list' %}">По алфавиту</a></li>
+              <li><a href="{% url 'qa' %}">Q&A</a></li>
             {% endblock %}
           </ul>
           <form class="navbar-form navbar-left" action="{% url 'student-list' %}">

@@ -10,6 +10,7 @@ from .views import (
     handle_vote,
     SendMailView,
     auth_code_login,
+    QAView,
 )
 
 
@@ -31,4 +32,5 @@ urlpatterns = [
         name='field-vote'),
     url(r'^sendmail/(?P<pk>[0-9]+)/$', SendMailView.as_view(),
         name='field-sendmail'),
+    url(r'^qa/$', QAView.as_view(), name='qa'),
 ]

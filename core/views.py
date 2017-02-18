@@ -424,3 +424,7 @@ class SendMailView(CreateView):
         return reverse('student-detail', kwargs={
             'pk': str(self.get_object().target_id)
         })
+
+
+class QAView(TemplateView):
+    template_name = 'core/qa.jade'
