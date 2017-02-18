@@ -74,9 +74,15 @@ block scripts
                 check_login ->
                     form = $ e.target
                     url = form.attr 'action'
-                    $.post url, form.serialize(), ->
+                    $.post(url, form.serialize(), ->
                         form.text 'OK'
-                        setTimeout -> show_tabs student, 2000
+                        setTimeout -> show_tabs student
+                    ).fail( (xhr, _, __) ->
+                        field_value = $ '#from-add-fact input[name=field_value]'
+                        if xhr.responseJSON['field_value']
+                            field_value.parent().addClass('has-error')
+                            $('<div class="help-block"></div>').html(xhr.responseJSON['field_value'][0].message).insertAfter(field_value)
+                    )
                 return false
             nav.on 'submit', '#from-add-fact', send_form
             nav.on 'change', '#field-name', (e) ->

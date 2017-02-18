@@ -354,6 +354,9 @@ class FieldValueCreateView(CreateView):
         vote.save()
         return HttpResponseRedirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        return HttpResponseBadRequest(form.errors.as_json(), content_type='application/json')
+
     def get_success_url(self):
         return reverse('student-detail', args=[self.kwargs['pk']])
 

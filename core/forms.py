@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+
 from .models import Grade, Student, FieldValue, Vote
 
 
@@ -40,6 +43,23 @@ class FieldValueForm(forms.ModelForm):
     # def clean_author_code(self):
     #     TODO: validate
         # return self.cleaned_data['author_code']
+    def clean(self):
+        name = self.cleaned_data['field_name']
+        value = self.cleaned_data['field_value']
+        if name in FieldValue.URL_FIELDS:
+            try:
+                URLValidator(schemes=('http', 'https'))(value)
+            except ValidationError:
+                self.add_error(
+                    'field_value',
+                    ValidationError(
+                        u'Ссылка должна быть полной и начинаться с http. Переданная ссылка: %(link)s',
+                        code='bad_url',
+                        params={'link': value}
+                    )
+                )
+
+
 
 
 class SendMailForm(forms.ModelForm):
