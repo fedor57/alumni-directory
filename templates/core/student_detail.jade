@@ -65,7 +65,7 @@ block content
                       a(href="{{ modification.field_value }}")
                           | {{ modification.field_value }}
                   - elif modification.field_name == 'email'
-                      a e-mail скрыт
+                      a E-mail скрыт
                   - else
                       {{ modification.field_value }}
                   - if modification.field_name != 'email'
@@ -121,5 +121,5 @@ block content
 
   .modal-footer
     .pull-left
-      | Добавьте новую информацию или проголосуйте за/против имеющейся
+      | Добавьте новую информацию или проголосуйте за или против имеющейся
     button.btn.btn-cls.btn-primary(type='button', data-dismiss='modal') Закрыть
