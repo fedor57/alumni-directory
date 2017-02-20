@@ -22,6 +22,12 @@ class InlineStudent(admin.TabularInline):
     readonly_fields = ('import_date', )
 
 
+@admin.register(Student)
+class AdminStudent(admin.ModelAdmin):
+    ordering = ('name',)
+    search_fields = ('name', 'main_grade__graduation_year', 'main_grade__letter')
+
+
 @admin.register(Grade)
 class AdminGrade(admin.ModelAdmin):
     list_display = ('graduation_year', 'letter')
@@ -30,7 +36,9 @@ class AdminGrade(admin.ModelAdmin):
 
 @admin.register(FieldValue)
 class AdminFieldValue(admin.ModelAdmin):
+    ordering = ('target__name',)
     list_display = ('target', 'field_name', 'field_value', 'status', 'votes')
+    search_fields = ('target__name', 'target__main_grade__graduation_year', 'field_name', 'field_value')
 
 
 @admin.register(Vote)
@@ -41,4 +49,7 @@ class AdminVote(admin.ModelAdmin):
     def field_target(self):
         return self.field_value.target
 
+    ordering = ('field_value__target__name',)
     list_display = (field_target, field_value, 'author_code', 'value')
+    search_fields = ('field_value__target__name', 'field_value__field_name', 'field_value__field_value')
+    list_filter = ('value',)

@@ -131,7 +131,7 @@ MEDIA_ROOT = os.path.join(ROOT, 'media')
 
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(ROOT, 'static')
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static')
 
 
 # Respect local_settings file
