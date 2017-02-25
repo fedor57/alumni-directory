@@ -163,7 +163,8 @@ class StudentListView(BaseStudentListView):
             for i in re_search.findall(query):
                 qfv.append(
                     Q(modifications__field_value__icontains=i) &
-                    ~Q(modifications__status=FieldValue.STATUS_DELETED)
+                    ~Q(modifications__status=FieldValue.STATUS_DELETED) &
+                    ~Q(modifications__field_name=FieldValue.FIELD_EMAIL)
                 )
                 qname.append(Q(name__icontains=i))
             if qfv and qname:
