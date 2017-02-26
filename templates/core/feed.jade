@@ -22,10 +22,14 @@ block content
               td {{ i.status_update_date|date:"d.m.Y H:i" }}
               td {{ i.target }}
               td {{ i.get_field_name_display }}
-              td {{ i.field_value }}
+              td
+                - if i.field_name == 'email'
+                    -
+                - else
+                    {{ i.field_value }}
               td {{ i.get_status_display }}
 
-              # TODO переделать в автора смены статуса?
+              //# TODO переделать в автора смены статуса?
               td {{ i.author_code.owner|default:"" }}
 
             - empty
