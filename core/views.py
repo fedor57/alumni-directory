@@ -17,6 +17,7 @@ from django.views.generic.edit import CreateView
 from django.http import \
     Http404, HttpResponseRedirect, HttpResponse, HttpResponseBadRequest
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 
 from .models import Grade, Student, FieldValue, AuthCode, Vote
 from .forms import StudentCreateForm, FieldValueForm, SendMailForm
@@ -439,8 +440,46 @@ class FeedView(ListView):
     template_name = 'core/feed.jade'
     paginate_by = 20
 
+    param_year = 'year'
+    param_grade = 'grade'
+    param_student = 'student_id'
+    param_author = 'author_id'
+
+    re_grade = re.compile(r'(\d{4})(\w)$', re.U)
+
     def get_queryset(self):
         qs = super(FeedView, self).get_queryset()
+        GET = self.request.GET
+
+        if GET.get(self.param_student):
+            qs = qs.filter(
+                target_id=GET.get(self.param_student))
+
+        elif GET.get(self.param_year):
+            year = GET.get(self.param_year)
+            qs = qs.filter(
+                target__main_grade__graduation_year=year)
+
+        elif GET.get(self.param_grade):
+            grade = GET.get(self.param_grade)
+            m = self.re_grade.match(grade)
+            if m:
+                y, l = m.group(1), m.group(2)
+                qs = qs.filter(
+                    (
+                        Q(target__main_grade__graduation_year=y) &
+                        Q(target__main_grade__letter=l)
+                    ) |
+                    Q(field_value=grade)
+                )
+            else:
+                qs = qs.none()
+
+        elif GET.get(self.param_author):
+            author = GET.get(self.param_author)
+            qs = qs.filter(
+                vote__author_code__owner_id=author)
+
         qs = qs\
             .prefetch_related(
                 'target',
@@ -465,4 +504,19 @@ class FeedView(ListView):
                 elif vote.value in (Vote.VOTE_DOWN, Vote.VOTE_TO_DEL):
                     i.votes_down.append(owner)
         data['object_list'] = ol
+
+        if ol and self.request.GET.get(self.param_student):
+            data['student'] = ol[0].target
+        elif self.request.GET.get(self.param_author):
+            author_id = self.request.GET.get(self.param_author)
+            data['author'] = get_object_or_404(Student, pk=author_id)
+        elif self.request.GET.get(self.param_year):
+            data['year'] = self.request.GET.get(self.param_year)
+        elif self.request.GET.get(self.param_grade):
+            grade = self.request.GET.get(self.param_grade).upper()
+            m = self.re_grade.match(grade)
+            if m:
+                data['year'], data['letter'] = m.group(1), m.group(2)
+            else:
+                data['grade'] = grade
         return data

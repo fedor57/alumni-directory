@@ -3,6 +3,23 @@ extends 'core/student_list.jade'
 
 
 block content
+    block breadcrumb
+      ol.breadcrumb
+        li
+          a(href="{% url 'feed' %}") Все фиды
+        - if request.GET.year
+          li {{ request.GET.year }}
+        - elif request.GET.student_id
+          li {{ student }}
+        - elif request.GET.author_id
+          li {{ author }}
+        - elif request.GET.grade
+          - if year
+            li
+              a(href="{% url 'feed' %}?year={{ year }}") {{ year }}
+            li {{ letter }}
+          - else
+            li {{ grade }}
 
     #feed.feed-list
       table.table.table-hover
@@ -20,7 +37,14 @@ block content
           - for i in object_list
             tr
               td {{ i.status_update_date|date:"d.m.Y H:i" }}
-              td {{ i.target }}
+
+              td
+                a(href='{% url "feed" %}?student_id={{ i.target_id }}')
+                  | {{ i.target.name }}
+                = ' '
+                a(href='{% url "feed" %}?grade={{ i.target.main_grade }}')
+                  | {{ i.target.main_grade }}
+
               td {{ i.get_field_name_display }}
 
               td
@@ -38,7 +62,8 @@ block content
                   - if j is None
                     | Аноним
                   - else
-                    | {{ j }}
+                    a(href='{% url "feed" %}?author_id={{ j.pk }}')
+                      | {{ j }}
                   br
 
               td
@@ -46,11 +71,13 @@ block content
                   - if j is None
                     | Аноним
                   - else
-                    | {{ j }}
+                    a(href='{% url "feed" %}?author_id={{ j.pk }}')
+                      | {{ j }}
                   br
 
             - empty
-              p Пусто.
+              tr
+                td Пусто.
 
     - if page_obj
         - bootstrap_pagination page_obj url=request.get_full_path
