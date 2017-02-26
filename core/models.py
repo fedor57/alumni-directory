@@ -295,6 +295,7 @@ class Vote(Timestamped):
     class Meta:
         verbose_name = 'голос'
         verbose_name_plural = 'голоса'
+        ordering = ('-timestamp',)
         # Плохо работает для анонимусов
         # unique_together = ('field_value', 'author_code', 'value')
 

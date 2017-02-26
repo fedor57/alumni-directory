@@ -444,6 +444,25 @@ class FeedView(ListView):
         qs = qs\
             .prefetch_related(
                 'target',
+                'vote_set__author_code__owner',
                 'author_code__owner',
             )
         return qs.order_by('-status_update_date')
+
+    def get_context_data(self, **kwargs):
+        data = super(FeedView, self).get_context_data(**kwargs)
+        ol = data['object_list']
+        ol = list(ol)
+        for i in ol:
+            i.votes_up = []
+            i.votes_down = []
+            for vote in i.vote_set.all():
+                owner = None
+                if vote.author_code_id and vote.author_code.owner_id:
+                    owner = vote.author_code.owner
+                if vote.value == Vote.VOTE_UP:
+                    i.votes_up.append(owner)
+                elif vote.value in (Vote.VOTE_DOWN, Vote.VOTE_TO_DEL):
+                    i.votes_down.append(owner)
+        data['object_list'] = ol
+        return data
