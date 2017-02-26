@@ -6,13 +6,27 @@ block content
     block breadcrumb
       ol.breadcrumb
         li
-          a(href="{% url 'feed' %}") Все фиды
+          a(href="{% url 'feed' %}") Все правки
+
         - if request.GET.year
           li {{ request.GET.year }}
+
         - elif request.GET.student_id
-          li {{ student }}
+          - if student.main_grade
+            li
+              a(href="{% url 'feed' %}?year={{ student.main_grade.graduation_year }}")
+                | {{ student.main_grade.graduation_year }}
+            li
+              a(href='{% url "feed" %}?grade={{ student.main_grade }}')
+                | {{ student.main_grade.letter }}
+          - else
+            li Выпускник
+          li {{ student.name }}
+
         - elif request.GET.author_id
+          li Автор правок
           li {{ author }}
+
         - elif request.GET.grade
           - if year
             li
@@ -55,7 +69,12 @@ block content
 
               td {{ i.get_status_display }}
 
-              td {{ i.author_code.owner|default:"" }}
+              td
+                - if i.author_code.owner
+                  a(href='{% url "feed" %}?author_id={{ i.author_code.owner_id }}')
+                    | {{ i.author_code.owner }}
+                - else
+                  = ' '
 
               td
                 - for j in i.votes_up
