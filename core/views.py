@@ -432,3 +432,18 @@ class SendMailView(CreateView):
 
 class QAView(TemplateView):
     template_name = 'core/qa.jade'
+
+
+class FeedView(ListView):
+    model = FieldValue
+    template_name = 'core/feed.jade'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = super(FeedView, self).get_queryset()
+        qs = qs\
+            .prefetch_related(
+                'target',
+                'author_code__owner',
+            )
+        return qs.order_by('-status_update_date')

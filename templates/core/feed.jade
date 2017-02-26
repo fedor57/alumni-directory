@@ -1,0 +1,37 @@
+extends 'core/student_list.jade'
+- load bootstrap3
+
+
+block content
+
+    #feed.feed-list
+      table.table.table-hover
+        thead
+          tr
+            th Дата
+            th Выпускник
+            th Тип
+            th Значение
+            th Статус
+            th Имя
+            th За
+            th Против
+        tbody
+          - for i in object_list
+            tr
+              td {{ i.status_update_date|date:"d.m.Y H:i" }}
+              td {{ i.target }}
+              td {{ i.get_field_name_display }}
+              td {{ i.field_value }}
+              td {{ i.get_status_display }}
+
+              # TODO переделать в автора смены статуса?
+              td {{ i.author_code.owner|default:"" }}
+
+            - empty
+              p Пусто.
+
+    - if page_obj
+        - bootstrap_pagination page_obj url=request.get_full_path
+
+    .students-bottom

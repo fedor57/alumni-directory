@@ -11,6 +11,7 @@ from .views import (
     SendMailView,
     auth_code_login,
     QAView,
+    FeedView,
 )
 
 
@@ -33,4 +34,5 @@ urlpatterns = [
     url(r'^sendmail/(?P<pk>[0-9]+)/$', SendMailView.as_view(),
         name='field-sendmail'),
     url(r'^qa/$', QAView.as_view(), name='qa'),
+    url(r'^feed/$', FeedView.as_view(), name='feed'),
 ]
