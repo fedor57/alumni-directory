@@ -1,0 +1,11 @@
+- if modification.field_name != 'email'
+  span.vote-panel
+    | &nbsp
+    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='upvoted' %}")
+      span.glyphicon.glyphicon-ok-circle
+    | &nbsp
+    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='downvoted' %}")
+      span.glyphicon.glyphicon-remove-circle
+    | &nbsp
+    a.btn-vote(data-href="{% url 'field-vote' pk=modification.pk vote_type='to_delete' %}")
+      span.glyphicon.glyphicon-ban-circle

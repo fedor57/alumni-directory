@@ -47,6 +47,7 @@ block content
             th Имя
             th За
             th Против
+            th Проголосовать
         tbody
           - for i in object_list
             tr
@@ -93,6 +94,10 @@ block content
                     a(href='{% url "feed" %}?author_id={{ j.pk }}')
                       | {{ j }}
                   br
+
+              td
+                - with modification=i
+                  include include/vote_buttons
 
             - empty
               tr
