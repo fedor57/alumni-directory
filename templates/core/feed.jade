@@ -3,6 +3,42 @@ extends 'core/student_list.jade'
 
 
 block content
+    mixin vote_btn(href, type, is_active)
+      if type == 'up'
+        if is_active
+          - var content = 'Отменить свой голос за этот факт'
+        else
+          - var content = 'Верно'
+      if type == 'down'
+        if is_active
+          - var content = 'Отменить свой голос против этого факта'
+        else
+          - var content = 'Неверно'
+      if type == 'delete'
+        if is_active
+          - var content = 'Отменить свой голос за удаление этого факта'
+        else
+          - var content = 'Удалить'
+      if is_active
+        - var href = href + '?remove=yes,please'
+      | &nbsp;
+      a.btn.btn-default.btn-vote(
+          data-href=href
+          rel="popover"
+          data-container="body"
+          data-trigger="hover"
+          data-placement="bottom"
+          data-content=content
+          class='active' if is_active else ''
+      )
+        if type == 'up'
+          - var cls = 'glyphicon-thumbs-up'
+        elif type == 'down'
+          - var cls = 'glyphicon-thumbs-down'
+        elif type == 'delete'
+          - var cls = 'glyphicon-ban-circle'
+        span.glyphicon(class=cls)
+
     block breadcrumb
       ol.breadcrumb
         li
@@ -97,7 +133,16 @@ block content
 
               td
                 - with modification=i
-                  include include/vote_buttons
+                  if not modification.is_owned
+                    - url 'field-vote' pk=modification.pk vote_type='upvoted' as href
+                    +vote_btn(href, 'up', modification.upvoted)
+
+                    - url 'field-vote' pk=modification.pk vote_type='downvoted' as href
+                    +vote_btn(href, 'down', modification.downvoted)
+
+                  if modification.is_owned
+                    - url 'field-vote' pk=modification.pk vote_type='to_delete' as href
+                    +vote_btn(href, 'delete', modification.deleted)
 
             - empty
               tr

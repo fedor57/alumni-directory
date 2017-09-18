@@ -99,6 +99,10 @@
         }
         document.cookie = name + "=" + value + expires + "; path=/";
     }
+    $(function() {$('body').popover({
+        selector: '[rel="popover"]',
+        trigger: 'hover'
+    })});
     </script>
 
     {% include "core/login.jade" %}

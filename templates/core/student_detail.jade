@@ -18,6 +18,42 @@ block scripts
   include core/include_vote
 
 block content
+  mixin vote_btn(href, type, is_active)
+    if type == 'up'
+      if is_active
+        - var content = 'Отменить свой голос за этот факт'
+      else
+        - var content = 'Проголосовать за этот факт'
+    if type == 'down'
+      if is_active
+        - var content = 'Отменить свой голос против этого факта'
+      else
+        - var content = 'Проголосовать против этого факта'
+    if type == 'delete'
+      if is_active
+        - var content = 'Отменить свой голосо за удаление этого факта'
+      else
+        - var content = 'Проголосовать за удаление этого факта'
+    if is_active
+      - var href = href + '?remove=yes,please'
+    | &nbsp;
+    a.btn.btn-default.btn-vote(
+        data-href=href
+        rel="popover"
+        data-container="body"
+        data-trigger="hover"
+        data-placement="bottom"
+        data-content=content
+        class='active' if is_active else ''
+    )
+      if type == 'up'
+        - var cls = 'glyphicon-thumbs-up'
+      elif type == 'down'
+        - var cls = 'glyphicon-thumbs-down'
+      elif type == 'delete'
+        - var cls = 'glyphicon-ban-circle'
+      span.glyphicon(class=cls)
+
   .modal-body
     button.close(type='button', data-dismiss='modal', aria-label='Close')
       span(aria-hidden='true') ×
@@ -38,9 +74,10 @@ block content
         .field-trusted {}
         .field-untrusted {color: #aaa;}
         .field-hidden {color: #bbb; display: none;}
-        .btn-vote {cursor: pointer;}
+        .btn-vote {cursor: pointer; margin-left: 1em;}
         .show-hidden {display: none; cursor: pointer;}
         .field-hidden ~ .show-hidden {display: block;}
+        .vote-panel {font-size: 120%;}
 
     .tab-content
       #tab-student.tab-pane.active(role='tabpanel')
@@ -51,8 +88,8 @@ block content
 
             ul
               - for modification in modifications
-                li(class="
-                  {% if modification.status == 'trusted' %}field-trusted{% else %}
+                li(data-id="{{ modification.id }}"
+                  class="{% if modification.status == 'trusted' %}field-trusted{% else %}
                       {% if modification.status == 'untrusted' %}field-untrusted{% else %}field-hidden{% endif %}
                   {% endif %}")
                   - if modification.field_name == 'social_vk'
@@ -68,7 +105,18 @@ block content
                       a E-mail скрыт
                   - else
                       {{ modification.field_value }}
-                  include include/vote_buttons
+                  - if modification.field_name != 'email'
+                    span.vote-panel
+                      if not modification.is_owned
+                        - url 'field-vote' pk=modification.pk vote_type='upvoted' as href
+                        +vote_btn(href, 'up', modification.upvoted)
+
+                        - url 'field-vote' pk=modification.pk vote_type='downvoted' as href
+                        +vote_btn(href, 'down', modification.downvoted)
+
+                      if modification.is_owned
+                        - url 'field-vote' pk=modification.pk vote_type='to_delete' as href
+                        +vote_btn(href, 'delete', modification.deleted)
               li.show-hidden
                 a ...
         - else

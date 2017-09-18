@@ -32,16 +32,10 @@ def get_data(auth_code):
     data = r.json()
     if data['status'] == 'ok':
         data['status'] = 'valid'
-    if data['status'] == 'disabled':
+    if data['status'] == 'disabled' or data['status'] == 'banned':
         data['status'] = 'revoked'
     return data
-    #return {  # Заглушка
-    #    'full_name': 'Заглушкова Заглушка',
-    #    'cross_name': 'Заглушкова Заглушка 1890A',
-    #    'year': 1890,
-    #    'letter': 'А',
-    #    'status': 'valid'
-    #}
+
 
 def escape_code(code):
     if code:
@@ -267,17 +261,33 @@ class StudentDetailView(DetailView):
     template_name = 'core/student_detail.jade'
     model = Student
 
+    def add_user_actions(self, fact):
+        code = self.request.session.get('auth_code')
+        if not code:
+            return fact
+        for vote in fact.vote_set.all():
+            if vote.author_code_id == code:
+                if vote.value == Vote.VOTE_ADDED:
+                    fact.is_owned = True
+                elif vote.value == Vote.VOTE_UP:
+                    fact.upvoted = True
+                elif vote.value == Vote.VOTE_DOWN:
+                    fact.downvoted = True
+                elif vote.value == Vote.VOTE_TO_DEL:
+                    fact.deleted = True
+        return fact
+
     def get_context_data(self, **kwargs):
         context_data = super(StudentDetailView, self).get_context_data(**kwargs)
 
         grouped_modifications_iterator = itertools.groupby(
-            self.object.modifications.order_by('field_name'),
+            self.object.modifications.prefetch_related('vote_set').order_by('field_name'),
             lambda modification: modification.field_name
         )
         order = [i[0] for i in FieldValue.STATUS_CHOICES]
         key = lambda x: (order.index(x.status), -x.votes)
         modifications = dict(
-            (field_name, sorted(field_values, key=key))
+            (field_name, sorted(map(self.add_user_actions, field_values), key=key))
             for field_name, field_values
             in grouped_modifications_iterator
         )
@@ -386,10 +396,17 @@ def handle_vote(request, pk, vote_type):
         author_code = AuthCode.objects.get_by_code(auth_code)
         obj.author_code = author_code
 
-        if Vote.objects.filter(
-                field_value_id=obj.field_value.pk,
-                value=obj.value,
-                author_code_id=obj.author_code.pk).exists():
+        existing = Vote.objects.filter(
+            field_value_id=obj.field_value.pk,
+            value=obj.value,
+            author_code_id=obj.author_code.pk
+        )
+        if request.GET.get('remove') == 'yes,please':
+            existing.delete()
+            return HttpResponseRedirect(
+                reverse('student-detail', kwargs={
+                    'pk': str(obj.field_value.target_id)}))
+        elif existing.exists():
             return HttpResponse(status=406)
 
     obj.save()
@@ -488,11 +505,28 @@ class FeedView(ListView):
             )
         return qs.order_by('-status_update_date')
 
+    def add_user_actions(self, fact):
+        code = self.request.session.get('auth_code')
+        if not code:
+            return fact
+        for vote in fact.vote_set.all():
+            if vote.author_code_id == code:
+                if vote.value == Vote.VOTE_ADDED:
+                    fact.is_owned = True
+                elif vote.value == Vote.VOTE_UP:
+                    fact.upvoted = True
+                elif vote.value == Vote.VOTE_DOWN:
+                    fact.downvoted = True
+                elif vote.value == Vote.VOTE_TO_DEL:
+                    fact.deleted = True
+        return fact
+
     def get_context_data(self, **kwargs):
         data = super(FeedView, self).get_context_data(**kwargs)
         ol = data['object_list']
         ol = list(ol)
         for i in ol:
+            self.add_user_actions(i)
             i.votes_up = []
             i.votes_down = []
             for vote in i.vote_set.all():

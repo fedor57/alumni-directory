@@ -230,6 +230,7 @@ class FieldValue(Timestamped):
                 trust_level = None
                 is_me = False
 
+            # TODO: DA FUCK!
             if last is not None and \
                     last.value == Vote.VOTE_TO_DEL and \
                     vote.value == Vote.VOTE_ADDED:

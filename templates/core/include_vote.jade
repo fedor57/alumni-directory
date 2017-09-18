@@ -5,13 +5,13 @@
         return
 
       t = $ e.target
-      if not t.hasClass '.btn-vote'
+      if not t.hasClass 'btn-vote'
         t = t.parents '.btn-vote'
       url = t.data 'href'
-      t = t.parents '.vote-panel'
+      t = t.parents('.vote-panel').parent('li')
       csrftoken = getCookie 'csrftoken'
-      $.post url, 'csrfmiddlewaretoken=' + csrftoken, ->
-        t.html '<span class="glyphicon glyphicon-ok"></span>'
-    $('#tab-student').on 'click', '.btn-vote', click_vote
-    $('#student-nav').on 'click', '.btn-vote', click_vote
+      $.post url, 'csrfmiddlewaretoken=' + csrftoken, (data) ->
+        $('.popover[role=tooltip]').remove()
+        t.replaceWith $(data).find('li[data-id=' + t.data('id') + ']')
+    $(document).on 'click', '#tab-student .btn-vote', click_vote
     $('#feed').on 'click', '.btn-vote', click_vote
