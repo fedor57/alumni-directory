@@ -39,55 +39,13 @@ class Grade(models.Model):
         return '%s%s' % (self.graduation_year, self.letter)
 
 
-class AuthCodeManager(models.Manager):
-    def get_by_code(self, code):
-        try:
-            author_code = self.get(code=code)
-        except ObjectDoesNotExist:
-            # TODO: resolve code to real name and status
-            author_code = self.create(
-                code=code, status='active', owner_name='Anonymous'
-            )
-        return author_code
-
-
-class AuthCode(models.Model):
-    STATUS_VALID = 'valid'
-    STATUS_NONEXISTENT = 'nonexistent'
-    STATUS_REVOKED = 'revoked'
-    STATUS_CHOICES = (
-        (STATUS_VALID, 'валиден'),
-        (STATUS_NONEXISTENT, 'несуществующий'),
-        (STATUS_REVOKED, 'отозван'),
-    )
-
-    code = models.CharField(
-        validators=[RegexValidator(r'^[^\s]+$')],
-        max_length=100, primary_key=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    owner = models.ForeignKey('Student', null=True)
-    cross_name = models.CharField(max_length=200)
-    updated_at = models.DateTimeField('Дата обновления данных', auto_now=True)
-    revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
-    trust_level = models.FloatField('Уровень доверия', default=1)
-
-    class Meta:
-        verbose_name = 'код авторизации'
-        verbose_name_plural = 'коды авторизации'
-
-    objects = AuthCodeManager()
-
-    def __unicode__(self):
-        return '%s (%s)' % (self.code, self.owner)
-
-
 class Student(Timestamped):
     """
     Выпускник
     """
     name = models.CharField(max_length=200)
     main_grade = models.ForeignKey(Grade)
-    creator_code = models.ForeignKey(AuthCode, blank=True, null=True)
+    creator_code = models.ForeignKey('AuthCode', blank=True, null=True)
     import_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -113,6 +71,49 @@ class Student(Timestamped):
         return result
 
 
+class AuthCodeManager(models.Manager):
+    def get_by_code(self, code):
+        try:
+            author_code = self.get(code=code)
+        except ObjectDoesNotExist:
+            # TODO: resolve code to real name and status
+            author_code = self.create(
+                code=code, status='active', owner_name='Anonymous'
+            )
+        return author_code
+
+
+class AuthCode(models.Model):
+    STATUS_VALID = 'valid'
+    STATUS_NONEXISTENT = 'nonexistent'
+    STATUS_REVOKED = 'revoked'
+    STATUS_CHOICES = (
+        (STATUS_VALID, 'валиден'),
+        (STATUS_NONEXISTENT, 'несуществующий'),
+        (STATUS_REVOKED, 'отозван'),
+    )
+
+    code = models.CharField(
+        validators=[RegexValidator(r'^[^\s]+$')],
+        max_length=100
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    owner = models.ForeignKey(Student, null=True)
+    cross_name = models.CharField(max_length=200)
+    updated_at = models.DateTimeField('Дата обновления данных', auto_now=True)
+    revoked_at = models.DateTimeField('Дата отзыва', null=True, blank=True)
+    trust_level = models.FloatField('Уровень доверия', default=1)
+
+    class Meta:
+        verbose_name = 'код авторизации'
+        verbose_name_plural = 'коды авторизации'
+
+    objects = AuthCodeManager()
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.code, self.owner)
+
+
 class FieldValueManager(models.Manager):
     def visible(self):
         return self.exclude(status='hidden')
@@ -132,14 +133,20 @@ class FieldValue(Timestamped):
     FIELD_SOCIAL_FB = 'social_fb'
     FIELD_GRADE = 'grade'
     EDITABLE_FIELDS = (
-        (FIELD_NAME, 'Изменения фамилии / имени', 'Если изменилась фамилия или имя после окончания школы, добавьте только измененную часть, она будет отображаться в скобках'),
-        (FIELD_EMAIL, 'Email', 'Адрес e-mail можно добавлять только для себя или с согласия владельца. E-Mail не будет показан, но на него можно будет отправить сообщение через форму с просьбой связаться'),
-        (FIELD_CITY, 'Город', 'Укажите город, в котором сейчас живет выпускник большую часть времени. Используйте русский язык, с большой буквы. Если это, по-прежнему, Москва, то указывать город не обязательно. Если город не известен широкой публике, напишите страну через запятую'),
-        (FIELD_COMPANY, 'Компания / ВУЗ', 'Укажите основное место работы или учебы выпусника, одновременно указывать не нужно'),
-        (FIELD_LINK, 'Домашняя страница', 'Если у выпускника есть личная страница с информацией о нем, биографией, контактами, укажите ее здесь'),
+        (FIELD_NAME, 'Изменения фамилии / имени',
+         'Если изменилась фамилия или имя после окончания школы, добавьте только измененную часть, она будет отображаться в скобках'),
+        (FIELD_EMAIL, 'Email',
+         'Адрес e-mail можно добавлять только для себя или с согласия владельца. E-Mail не будет показан, но на него можно будет отправить сообщение через форму с просьбой связаться'),
+        (FIELD_CITY, 'Город',
+         'Укажите город, в котором сейчас живет выпускник большую часть времени. Используйте русский язык, с большой буквы. Если это, по-прежнему, Москва, то указывать город не обязательно. Если город не известен широкой публике, напишите страну через запятую'),
+        (FIELD_COMPANY, 'Компания / ВУЗ',
+         'Укажите основное место работы или учебы выпусника, одновременно указывать не нужно'),
+        (FIELD_LINK, 'Домашняя страница',
+         'Если у выпускника есть личная страница с информацией о нем, биографией, контактами, укажите ее здесь'),
         (FIELD_SOCIAL_FB, 'Facebook', 'Укажите адрес профиля в Facebook, если выпусник им пользуется'),
         (FIELD_SOCIAL_VK, 'ВКонтакте', 'Укажите адрес профиля ВКонтакте, если выпусник им пользуется'),
-        (FIELD_GRADE, 'Учился также в классе', 'Выпускники, в первую очередь, приписываются к классу, с которым они закончили школу или из которого из нее ушли. Если они успели поучиться в другом классе, это можно указать дополнительно. Для указания класса используйте год выпуска класса, а не год, когда выпускник там учился'),
+        (FIELD_GRADE, 'Учился также в классе',
+         'Выпускники, в первую очередь, приписываются к классу, с которым они закончили школу или из которого из нее ушли. Если они успели поучиться в другом классе, это можно указать дополнительно. Для указания класса используйте год выпуска класса, а не год, когда выпускник там учился'),
     )
     URL_FIELDS = (
         FIELD_LINK,
@@ -232,8 +239,8 @@ class FieldValue(Timestamped):
 
             # TODO: DA FUCK!
             if last is not None and \
-                    last.value == Vote.VOTE_TO_DEL and \
-                    vote.value == Vote.VOTE_ADDED:
+                            last.value == Vote.VOTE_TO_DEL and \
+                            vote.value == Vote.VOTE_ADDED:
                 need_statuses[pk] = FieldValue.STATUS_DELETED
             elif vote.value in (Vote.VOTE_ADDED, Vote.VOTE_UP):
                 l.append((pk, +1, valid, trust_level, is_me))
@@ -320,7 +327,7 @@ class Teachers(models.Model):
     class Meta:
         verbose_name = 'учителя'
         verbose_name_plural = 'учителя'
-        ordering = ('torder', )
+        ordering = ('torder',)
 
     def __unicode__(self):
         return ' '.join([self.role, self.content])
