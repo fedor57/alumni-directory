@@ -4,3 +4,4 @@ git+https://github.com/syrusakbary/pyjade#d8cf1d9404c759c6a2430c9a900874ab0e970c
 coffeescript
 git+https://github.com/dyve/django-bootstrap3#a90f6e089e8e427926f299b65f31663cd0c0bcff
 requests
+mysql-python
