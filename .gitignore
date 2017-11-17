@@ -1,5 +1,7 @@
 .DS_Store
 .idea
+*.iml
+venv
 *.sqlite3
 *.pyc
 local_settings.py
