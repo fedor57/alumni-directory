@@ -86,7 +86,7 @@ block content
             th Проголосовать
         tbody
           - for i in object_list
-            tr
+            tr(data-id='{{i.id}}')
               td {{ i.status_update_date|date:"d.m.Y H:i" }}
 
               td

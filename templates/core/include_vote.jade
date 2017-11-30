@@ -4,14 +4,26 @@
       if check_login()
         return
 
-      t = $ e.target
-      if not t.hasClass 'btn-vote'
-        t = t.parents '.btn-vote'
-      url = t.data 'href'
-      t = t.parents('.vote-panel').parent('li')
-      csrftoken = getCookie 'csrftoken'
-      $.post url, 'csrfmiddlewaretoken=' + csrftoken, (data) ->
+      t = $(e.target)
+      if not t.hasClass('btn-vote')
+        t = t.parents('.btn-vote')
+      url = t.data('href')
+      csrftoken = getCookie('csrftoken')
+      in_feed = t.parents('.feed-list').length
+      if in_feed
+        id = t.parents('tr').data('id')
+      else
+        id = t.parents('.vote-panel').parent('li').data('id')
+      $.post(url, 'csrfmiddlewaretoken=' + csrftoken, (data) ->
         $('.popover[role=tooltip]').remove()
-        t.replaceWith $(data).find('li[data-id=' + t.data('id') + ']')
-    $(document).on 'click', '#tab-student .btn-vote', click_vote
-    $('#feed').on 'click', '.btn-vote', click_vote
+        new_buttons = $(data).find('li[data-id=' + id + ']')
+        if in_feed
+          td = t.parents('td')
+          td.empty()
+          td.append(new_buttons.find('.vote-panel').contents())
+        else
+          t = t.parents('.vote-panel').parent('li')
+          t.replaceWith(new_buttons)
+      )
+    $(document).on('click', '#tab-student .btn-vote', click_vote)
+    $('#feed').on('click', '.btn-vote', click_vote)

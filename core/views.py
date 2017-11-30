@@ -410,6 +410,7 @@ def handle_vote(request, pk, vote_type):
             return HttpResponse(status=406)
 
         if obj.value in (Vote.VOTE_UP, Vote.VOTE_DOWN):
+            # Delete the opposite vote if there is
             Vote.objects.filter(
                 field_value_id=obj.field_value_id,
                 value=obj.value == Vote.VOTE_UP and Vote.VOTE_DOWN or Vote.VOTE_UP,
@@ -545,7 +546,7 @@ class FeedView(ListView):
                     owner = vote.author_code.owner
                 if vote.value == Vote.VOTE_UP:
                     i.votes_up.append(owner)
-                elif vote.value in (Vote.VOTE_DOWN, Vote.VOTE_TO_DEL):
+                elif vote.value == Vote.VOTE_DOWN:
                     i.votes_down.append(owner)
         data['object_list'] = ol
 
