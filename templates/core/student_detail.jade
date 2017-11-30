@@ -23,17 +23,17 @@ block content
       if is_active
         - var content = 'Отменить свой голос за этот факт'
       else
-        - var content = 'Проголосовать за этот факт'
+        - var content = 'Верно'
     if type == 'down'
       if is_active
         - var content = 'Отменить свой голос против этого факта'
       else
-        - var content = 'Проголосовать против этого факта'
+        - var content = 'Неверно'
     if type == 'delete'
       if is_active
         - var content = 'Отменить свой голос за удаление этого факта'
       else
-        - var content = 'Проголосовать за удаление этого факта'
+        - var content = 'Удалить'
     if is_active
       - var href = href + '?remove=yes,please'
     | &nbsp;
