@@ -266,7 +266,7 @@ class StudentDetailView(DetailView):
         if not code:
             return fact
         for vote in fact.vote_set.all():
-            if vote.author_code_id == code:
+            if vote.author_code and vote.author_code.code == code:
                 if vote.value == Vote.VOTE_ADDED:
                     fact.is_owned = True
                 elif vote.value == Vote.VOTE_UP:
@@ -397,9 +397,9 @@ def handle_vote(request, pk, vote_type):
         obj.author_code = author_code
 
         existing = Vote.objects.filter(
-            field_value_id=obj.field_value.pk,
+            field_value_id=obj.field_value_id,
             value=obj.value,
-            author_code_id=obj.author_code.pk
+            author_code_id=obj.author_code_id
         )
         if request.GET.get('remove') == 'yes,please':
             existing.delete()
@@ -408,6 +408,13 @@ def handle_vote(request, pk, vote_type):
                     'pk': str(obj.field_value.target_id)}))
         elif existing.exists():
             return HttpResponse(status=406)
+
+        if obj.value in (Vote.VOTE_UP, Vote.VOTE_DOWN):
+            Vote.objects.filter(
+                field_value_id=obj.field_value_id,
+                value=obj.value == Vote.VOTE_UP and Vote.VOTE_DOWN or Vote.VOTE_UP,
+                author_code_id=obj.author_code_id
+            ).delete()
 
     obj.save()
     return HttpResponseRedirect(
@@ -510,7 +517,7 @@ class FeedView(ListView):
         if not code:
             return fact
         for vote in fact.vote_set.all():
-            if vote.author_code_id == code:
+            if vote.author_code and vote.author_code.code == code:
                 if vote.value == Vote.VOTE_ADDED:
                     fact.is_owned = True
                 elif vote.value == Vote.VOTE_UP:
