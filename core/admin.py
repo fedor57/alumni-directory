@@ -26,6 +26,7 @@ class InlineStudent(admin.TabularInline):
 class AdminStudent(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name', 'main_grade__graduation_year', 'main_grade__letter')
+    readonly_fields = ('timestamp',)
 
 
 @admin.register(Grade)
@@ -39,6 +40,7 @@ class AdminFieldValue(admin.ModelAdmin):
     ordering = ('target__name',)
     list_display = ('target', 'field_name', 'field_value', 'status', 'votes')
     search_fields = ('target__name', 'target__main_grade__graduation_year', 'field_name', 'field_value')
+    readonly_fields = ('timestamp',)
 
 
 @admin.register(Vote)
@@ -53,3 +55,4 @@ class AdminVote(admin.ModelAdmin):
     list_display = (field_target, field_value, 'author_code', 'value')
     search_fields = ('field_value__target__name', 'field_value__field_name', 'field_value__field_value')
     list_filter = ('value',)
+    readonly_fields = ('timestamp',)
