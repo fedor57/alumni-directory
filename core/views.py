@@ -509,6 +509,9 @@ class FeedView(ListView):
                 'target',
                 'vote_set__author_code__owner',
                 'author_code__owner',
+            ) \
+            .exclude(
+                status=FieldValue.STATUS_DELETED
             )
         return qs.order_by('-status_update_date')
 
