@@ -517,6 +517,9 @@ class FeedView(ListView):
             ) \
             .exclude(
                 status=FieldValue.STATUS_DELETED
+            ) \
+            .exclude(
+                field_name=FieldValue.FIELD_EMAIL,
             )
         return qs.order_by('-status_update_date')
 
