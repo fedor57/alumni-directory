@@ -502,14 +502,18 @@ class FeedView(ListView):
 
         elif GET.get(self.param_author):
             author = GET.get(self.param_author)
+            vote_ids = Vote.objects.filter(
+                author_code__owner_id=author
+            ).values_list('field_value_id', flat=True)
             qs = qs.filter(
-                vote__author_code__owner_id=author)
+                pk__in=list(vote_ids)
+            )
 
         qs = qs\
             .prefetch_related(
-                'target',
-                'vote_set__author_code__owner',
-                'author_code__owner',
+                'target__main_grade',
+                'vote_set__author_code__owner__main_grade',
+                'author_code__owner__main_grade',
             ) \
             .exclude(
                 status=FieldValue.STATUS_DELETED
