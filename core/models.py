@@ -241,6 +241,9 @@ class FieldValue(Timestamped):
             else:
                 l.append((pk, -1, valid, trust_level, is_me))
 
+        if not l:
+            return
+
         statuses = {}
         votes = {}
         for pk, status, vote in get_statuses(l):
