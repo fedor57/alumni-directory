@@ -215,7 +215,6 @@ class FieldValue(Timestamped):
             field_value__status=cls.STATUS_DELETED,
         ).order_by('-timestamp')
 
-        last = None
         for vote in qs.iterator():
             pk = vote.field_value_id
             author = vote.author_code
@@ -237,16 +236,10 @@ class FieldValue(Timestamped):
                 trust_level = None
                 is_me = False
 
-            # TODO: DA FUCK!
-            if last is not None and \
-                            last.value == Vote.VOTE_TO_DEL and \
-                            vote.value == Vote.VOTE_ADDED:
-                need_statuses[pk] = FieldValue.STATUS_DELETED
-            elif vote.value in (Vote.VOTE_ADDED, Vote.VOTE_UP):
+            if vote.value in (Vote.VOTE_ADDED, Vote.VOTE_UP):
                 l.append((pk, +1, valid, trust_level, is_me))
             else:
                 l.append((pk, -1, valid, trust_level, is_me))
-            last = vote
 
         statuses = {}
         votes = {}
