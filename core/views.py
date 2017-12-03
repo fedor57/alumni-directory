@@ -416,6 +416,13 @@ def handle_vote(request, pk, vote_type):
                 value=obj.value == Vote.VOTE_UP and Vote.VOTE_DOWN or Vote.VOTE_UP,
                 author_code_id=obj.author_code_id
             ).delete()
+        else:
+            if not Vote.objects.filter(
+                    field_value_id=obj.field_value_id,
+                    value=Vote.VOTE_ADDED,
+                    author_code_id=obj.author_code_id
+            ).exists():
+                return HttpResponse(status=412)
     elif obj.value == Vote.VOTE_TO_DEL:
         return HttpResponseBadRequest()
 
