@@ -19,6 +19,7 @@ from django.http import \
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 
+from core import rules
 from .models import Grade, Student, FieldValue, AuthCode, Vote
 from .forms import StudentCreateForm, FieldValueForm, SendMailForm
 
@@ -364,6 +365,10 @@ class FieldValueCreateView(CreateView):
         if auth_code:
             vote.author_code = auth_code
         vote.save()
+        rules.update_status(
+            self.object.target_id,
+            self.object.field_name,
+        )
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
@@ -411,6 +416,10 @@ def handle_vote(request, pk, vote_type):
         )
         if request.GET.get('remove') == 'yes,please':
             existing.delete()
+            rules.update_status(
+                obj.field_value.target_id,
+                obj.field_value.field_name,
+            )
             return HttpResponseRedirect(
                 reverse('student-detail', kwargs={
                     'pk': str(obj.field_value.target_id)}))
@@ -428,6 +437,10 @@ def handle_vote(request, pk, vote_type):
         return HttpResponseBadRequest()
 
     obj.save()
+    rules.update_status(
+        obj.field_value.target_id,
+        obj.field_value.field_name,
+    )
     return HttpResponseRedirect(
         reverse('student-detail', kwargs={
             'pk': str(obj.field_value.target_id)}))

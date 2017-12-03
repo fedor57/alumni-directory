@@ -7,10 +7,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 from django.utils.functional import cached_property
-
-from core.rules import get_statuses
 
 
 class Timestamped(models.Model):
@@ -199,80 +196,6 @@ class FieldValue(Timestamped):
     def __unicode__(self):
         return '%s _ %s' % (self.target, self.get_field_name_display())
 
-    @classmethod
-    def update_status(cls, target_id, field_name):
-        values = {}  # Экземпляры FieldValue
-        need_statuses = {}
-        l = []
-
-        qs = Vote.objects.filter(
-            field_value__target_id=target_id,
-            field_value__field_name=field_name,
-        ).select_related(
-            'field_value',
-            'author_code',
-        ).exclude(
-            field_value__status=cls.STATUS_DELETED,
-        ).order_by('-timestamp')
-
-        for vote in qs.iterator():
-            pk = vote.field_value_id
-            author = vote.author_code
-            values.setdefault(pk, vote.field_value)
-            if not author or author.status == AuthCode.STATUS_NONEXISTENT:
-                valid = False
-                trust_level = None
-                is_me = False
-            elif author.status == AuthCode.STATUS_VALID:
-                valid = True
-                trust_level = author.trust_level
-                is_me = target_id == author.owner_id
-            elif author.revoked_at and vote.timestamp < author.revoked_at:
-                valid = True
-                trust_level = author.trust_level
-                is_me = target_id == author.owner_id
-            else:
-                valid = False
-                trust_level = None
-                is_me = False
-
-            if vote.value in (Vote.VOTE_ADDED, Vote.VOTE_UP):
-                l.append((pk, +1, valid, trust_level, is_me))
-            else:
-                l.append((pk, -1, valid, trust_level, is_me))
-
-        if not l:
-            return
-
-        statuses = {}
-        votes = {}
-        for pk, status, vote in get_statuses(l):
-            votes[pk] = vote
-            statuses[pk] = status
-
-        for pk, f in values.items():
-            if statuses[pk] is None:
-                need_status = FieldValue.STATUS_HIDDEN
-            elif pk in need_statuses:
-                need_status = need_statuses[pk]
-            elif f.field_name == cls.FIELD_LINK:
-                need_status = FieldValue.STATUS_TRUSTED
-            elif statuses[pk] is True:
-                need_status = FieldValue.STATUS_TRUSTED
-            else:
-                need_status = FieldValue.STATUS_UNTRUSTED
-
-            update_fields = []
-            if f.status != need_status:
-                f.status = need_status
-                f.status_update_date = timezone.now()
-                update_fields.extend(['status', 'status_update_date'])
-            if f.votes != votes[pk]:
-                f.votes = votes[pk]
-                update_fields.append('votes')
-            if update_fields:
-                f.save(update_fields=update_fields)
-
 
 class Vote(Timestamped):
     """
@@ -305,13 +228,6 @@ class Vote(Timestamped):
 
     def __unicode__(self):
         return self.field_value.field_value
-
-    def save(self, *args, **kwargs):
-        super(Vote, self).save(*args, **kwargs)
-        self.field_value.update_status(
-            self.field_value.target_id,
-            self.field_value.field_name,
-        )
 
 
 class Teachers(models.Model):
