@@ -416,6 +416,8 @@ def handle_vote(request, pk, vote_type):
                 value=obj.value == Vote.VOTE_UP and Vote.VOTE_DOWN or Vote.VOTE_UP,
                 author_code_id=obj.author_code_id
             ).delete()
+    elif obj.value == Vote.VOTE_TO_DEL:
+        return HttpResponseBadRequest()
 
     obj.save()
     return HttpResponseRedirect(
