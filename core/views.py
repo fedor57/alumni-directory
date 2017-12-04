@@ -365,7 +365,7 @@ class FieldValueCreateView(CreateView):
         if auth_code:
             vote.author_code = auth_code
         vote.save()
-        rules.update_status(
+        rules.update_fields(
             self.object.target_id,
             self.object.field_name,
         )
@@ -416,7 +416,7 @@ def handle_vote(request, pk, vote_type):
         )
         if request.GET.get('remove') == 'yes,please':
             existing.delete()
-            rules.update_status(
+            rules.update_fields(
                 obj.field_value.target_id,
                 obj.field_value.field_name,
             )
@@ -437,7 +437,7 @@ def handle_vote(request, pk, vote_type):
         return HttpResponseBadRequest()
 
     obj.save()
-    rules.update_status(
+    rules.update_fields(
         obj.field_value.target_id,
         obj.field_value.field_name,
     )
