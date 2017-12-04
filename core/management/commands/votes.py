@@ -4,6 +4,9 @@ import sys
 from itertools import groupby
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Max
+
+from core import rules
 from core.models import FieldValue, Vote
 
 
@@ -58,7 +61,11 @@ class Command(BaseCommand):
         self.stdout.write("Total actions taken: {}".format(total_actions))
 
     def run_update(self):
-        raise NotImplementedError()
+        for item in FieldValue.objects \
+                .values('target_id', 'field_name') \
+                .annotate(last_vote=Max('vote__timestamp')) \
+                .order_by('last_vote'):
+            rules.update_fields(item['target_id'], item['field_name'])
 
     def _err(self, msg):
         self.stdout.write(self.style.ERROR(msg))
