@@ -282,7 +282,10 @@ class StudentDetailView(DetailView):
         context_data = super(StudentDetailView, self).get_context_data(**kwargs)
 
         grouped_modifications_iterator = itertools.groupby(
-            self.object.modifications.prefetch_related('vote_set').order_by('field_name'),
+            self.object.modifications
+                .exclude(status=FieldValue.STATUS_DELETED)
+                .prefetch_related('vote_set')
+                .order_by('field_name'),
             lambda modification: modification.field_name
         )
         order = [i[0] for i in FieldValue.STATUS_CHOICES]
