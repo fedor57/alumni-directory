@@ -8,7 +8,7 @@ from django.utils import timezone
 from core.models import Vote, AuthCode, FieldValue
 
 
-def update_fields(target_id, field_name):
+def update_fields(target_id, field_name, timestamp=None):
     all_votes = list(Vote.objects.filter(
         field_value__target_id=target_id,
         field_value__field_name=field_name,
@@ -20,6 +20,8 @@ def update_fields(target_id, field_name):
     computed_statuses = {}
     old_votes = {}
     edits = []
+    if not timestamp:
+        timestamp = timezone.now()
 
     for edit, votes in groupby(all_votes, key=lambda x: x.field_value):
         edits.append(edit)
@@ -60,7 +62,7 @@ def update_fields(target_id, field_name):
         fields_to_update = []
         if edit.status != computed_statuses[edit]:
             edit.status = computed_statuses[edit]
-            edit.status_update_date = timezone.now()
+            edit.status_update_date = timestamp
             fields_to_update.extend(['status', 'status_update_date'])
         if edit.votes != old_votes[edit]:
             fields_to_update.append('votes')
