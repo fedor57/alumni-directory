@@ -80,7 +80,7 @@ block content
             th Тип
             th Значение
             th Статус
-            th Имя
+            th Автор
             th За
             th Против
             th Проголосовать
@@ -95,6 +95,8 @@ block content
                 = ' '
                 a(href='{% url "feed" %}?grade={{ i.target.main_grade }}')
                   | {{ i.target.main_grade }}
+                = ' '
+                a.small.glyphicon(href='{% url "student-list" %}?query={{ i.target.name | urlencode }}' class='glyphicon-share')
 
               td {{ i.get_field_name_display }}
 
