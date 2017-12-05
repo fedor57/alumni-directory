@@ -34,7 +34,7 @@ def update_fields(target_id, field_name, timestamp=None):
         for vote in votes:
             if vote.value == Vote.VOTE_TO_DEL:
                 to_delete_vote = vote
-                if vote.author_code.owner_id == edit.target_id:
+                if vote.author_code_id and vote.author_code.owner_id == edit.target_id:
                     computed_statuses[edit] = FieldValue.STATUS_DELETED
             change = vote.value in (Vote.VOTE_ADDED, Vote.VOTE_UP) and 1 or -1
             is_own_edit = False
