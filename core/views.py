@@ -405,10 +405,11 @@ def handle_vote(request, pk, vote_type):
         obj.author_code = author_code
 
         if obj.value == Vote.VOTE_TO_DEL:
-            if not Vote.objects.filter(
-                    field_value_id=obj.field_value_id,
-                    value=Vote.VOTE_ADDED,
-                    author_code_id=obj.author_code_id
+            if author_code.owner_id != obj.field_value.target_id \
+            and not Vote.objects.filter(
+                field_value_id=obj.field_value_id,
+                value=Vote.VOTE_ADDED,
+                author_code_id=obj.author_code_id
             ).exists():
                 return HttpResponse(status=412)
 
