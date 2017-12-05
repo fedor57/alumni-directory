@@ -28,7 +28,7 @@ class FieldValueStatusTestCase(TestCase):
         self.assertEqual(self.f.status, FieldValue.STATUS_TRUSTED)
         self.assertEqual(self.f.votes, 1)
 
-    def test_untrusted(self):
+    def test_two_trusted(self):
         c = AuthCode.objects.get(code='1')
         f = FieldValue(target=self.f.target, author_code=c, field_name=FieldValue.FIELD_CITY, field_value='Osaka')
         f.save()
@@ -36,7 +36,7 @@ class FieldValueStatusTestCase(TestCase):
 
         rules.update_fields(self.f.target_id, self.f.field_name)
         self.f.refresh_from_db()
-        self.assertEqual(self.f.status, FieldValue.STATUS_UNTRUSTED)
+        self.assertEqual(self.f.status, FieldValue.STATUS_TRUSTED)
         self.assertEqual(self.f.votes, 1)
 
     def test_anon_untrusted(self):

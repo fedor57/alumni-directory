@@ -60,17 +60,15 @@ def update_fields(target_id, field_name, timestamp=None):
 
     edits = sorted(edits, key=lambda e: e.votes, reverse=True)
 
-    first = True
     for edit in edits:
         if edit not in computed_statuses:
             if edit.votes > 0:
-                if first and edit.votes > 0.9:
+                if edit.votes > 0.9:
                     computed_statuses[edit] = FieldValue.STATUS_TRUSTED
                 else:
                     computed_statuses[edit] = FieldValue.STATUS_UNTRUSTED
             else:
                 computed_statuses[edit] = FieldValue.STATUS_HIDDEN
-        first = False
 
         fields_to_update = []
         if edit.status != computed_statuses[edit]:
