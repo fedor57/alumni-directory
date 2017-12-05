@@ -114,7 +114,7 @@ block content
                         - url 'field-vote' pk=modification.pk vote_type='downvoted' as href
                         +vote_btn(href, 'down', modification.downvoted)
 
-                      if modification.is_owned
+                      if modification.is_owned or request.session.student_id == object.id
                         - url 'field-vote' pk=modification.pk vote_type='to_delete' as href
                         +vote_btn(href, 'delete', modification.deleted)
               li.show-hidden
