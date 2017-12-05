@@ -86,6 +86,10 @@ class Command(BaseCommand):
             up_met = False
             down_met = False
             for vote in v:
+                is_owner = False
+                if vote.author_code_id and vote.author_code.owner_id == field.target_id:
+                    is_owner = True
+
                 if vote.value == Vote.VOTE_ADDED:
                     if author_met:
                         errs.append("Additional author for field #{}: {}".format(field.id, vote.author_code_id))
@@ -97,12 +101,13 @@ class Command(BaseCommand):
                     is_author = True
                 elif is_author and vote.value in (Vote.VOTE_UP, Vote.VOTE_DOWN):
                     errs.append("Up/down vote by author for field #{}".format(field.id))
-                elif not is_author and vote.value == Vote.VOTE_TO_DEL:
-                    errs.append("Delete vote not by author for field #{}".format(field.id))
+                elif not (is_author or is_owner) and vote.value == Vote.VOTE_TO_DEL:
+                    errs.append("Delete vote not by author/owner for field #{}".format(field.id))
                 elif up_met and vote.value == Vote.VOTE_DOWN:
                     errs.append("Down after up for field #{}".format(field.id))
                 elif down_met and vote.value == Vote.VOTE_UP:
                     errs.append("Up after down for field #{}".format(field.id))
+
                 if vote.value == Vote.VOTE_UP:
                     up_met = True
                 if vote.value == Vote.VOTE_DOWN:
@@ -124,16 +129,20 @@ class Command(BaseCommand):
             is_author = False
             up_downs = []
             for vote in v:
+                is_owner = False
+                if vote.author_code_id and vote.author_code.owner_id == field.target_id:
+                    is_owner = True
+
                 if vote.value == Vote.VOTE_ADDED:
                     is_author = True
                 elif is_author and vote.value in (Vote.VOTE_UP, Vote.VOTE_DOWN):
                     vote.delete()
                     errs.append("Removed up/down vote by author for field #{}".format(field.id))
                     continue
-                elif not is_author and vote.value == Vote.VOTE_TO_DEL:
+                elif not (is_author or is_owner) and vote.value == Vote.VOTE_TO_DEL:
                     vote.value = Vote.VOTE_DOWN
                     vote.save()
-                    errs.append("Rewrote delete vote not by author to down for field #{}".format(field.id))
+                    errs.append("Rewrote delete vote not by author/owner to down for field #{}".format(field.id))
                 if vote.value in (Vote.VOTE_UP, Vote.VOTE_DOWN):
                     up_downs.append(vote)
             if len(up_downs) > 1:
