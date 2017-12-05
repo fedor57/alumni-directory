@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 .values('target_id', 'field_name') \
                 .annotate(last_vote=Max('vote__timestamp')) \
                 .order_by('last_vote'):
-            rules.update_fields(item['target_id'], item['field_name'], timestamp=item['last_vote'])
+            rules.update_fields(item['target_id'], item['field_name'], timestamp=item['last_vote'], force_update=True)
 
     def _err(self, msg):
         self.stdout.write(self.style.ERROR(msg))

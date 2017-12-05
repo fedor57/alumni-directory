@@ -8,7 +8,7 @@ from django.utils import timezone
 from core.models import Vote, AuthCode, FieldValue
 
 
-def update_fields(target_id, field_name, timestamp=None):
+def update_fields(target_id, field_name, timestamp=None, force_update=False):
     all_votes = list(Vote.objects.filter(
         field_value__target_id=target_id,
         field_value__field_name=field_name,
@@ -71,7 +71,7 @@ def update_fields(target_id, field_name, timestamp=None):
                 computed_statuses[edit] = FieldValue.STATUS_HIDDEN
 
         fields_to_update = []
-        if edit.status != computed_statuses[edit]:
+        if edit.status != computed_statuses[edit] or force_update:
             edit.status = computed_statuses[edit]
             edit.status_update_date = timestamp
             fields_to_update.extend(['status', 'status_update_date'])
