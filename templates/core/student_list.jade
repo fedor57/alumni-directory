@@ -142,6 +142,12 @@ block content
             - if group.is_grade
               a(href="{% url 'student-list' %}?grade_id={{ group.pk }}")
                 | {{ group }}
+              = ' '
+              span.small
+                = '[ '
+                a.text-muted(href='{% url "feed" %}?grade={{ group }}')
+                  | правки
+                | ]
             - else
               | {{ group }}
 
