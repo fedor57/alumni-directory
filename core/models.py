@@ -175,7 +175,7 @@ class FieldValue(Timestamped):
     status = models.CharField('Статус правки', choices=STATUS_CHOICES,
                               default=STATUS_TRUSTED, max_length=20)
     status_update_date = models.DateTimeField(
-        'Дата обновления статуса', null=True, blank=True)
+        'Дата обновления статуса', auto_now_add=True)
     votes = models.FloatField(default=0)
 
     objects = FieldValueManager()
