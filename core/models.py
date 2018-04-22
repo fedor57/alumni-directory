@@ -209,6 +209,14 @@ class FieldValue(Timestamped):
             return  # Недобавляем повторящиеся значение
         super(FieldValue, self).save(*args, **kwargs)
 
+    @cached_property
+    def delete_vote(self):
+        if self.status != FieldValue.STATUS_DELETED:
+            return
+        return self.vote_set.filter(
+            value=Vote.VOTE_TO_DEL
+        ).prefetch_related('author_code').first()
+
     def __unicode__(self):
         return '%s _ %s' % (self.target, self.get_field_name_display())
 

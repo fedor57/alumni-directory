@@ -342,25 +342,51 @@ class FieldValueCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
 
-        # Привязываем правку к выпускнику по id из урла
-        student_id = self.kwargs.get('pk')
-        exists = FieldValue.objects.filter(
-            target_id=student_id,
-            field_name=self.object.field_name,
-            field_value__iexact=self.object.field_value,
-        ).exists()
-        if exists:
-            return HttpResponseRedirect(self.get_success_url())
-        try:
-            self.object.target = Student.objects.get(id=student_id)
-        except Student.objects.DoesNotExist:
-            return Http404()
-
         # Привязываем код авторизации и создаем для него запись в таблице кодов
         auth_code = self.request.session.get('auth_code')
         if auth_code:
             auth_code = AuthCode.objects.get_by_code(auth_code)
             self.object.author_code = auth_code
+
+        # Привязываем правку к выпускнику по id из урла
+        student_id = self.kwargs.get('pk')
+        existing = FieldValue.objects.filter(
+            target_id=student_id,
+            field_name=self.object.field_name,
+            field_value__iexact=self.object.field_value,
+        )
+        if existing:
+            existing = existing.first()
+            if existing.status == FieldValue.STATUS_DELETED:
+                # it was deleted either by author or by target
+                # if by author and author adds it back — ok
+                # if by author and target adds it back — ok
+                # if by author and another adds it back — ok
+                # if by target and target adds it back — ok
+                # if by target and author adds it back — not ok
+                # if by target and another adds it back — not ok
+                if existing.delete_vote.author_code.owner_id == existing.target_id \
+                        and auth_code != existing.delete_vote.author_code:
+                    return HttpResponseRedirect(self.get_success_url())
+                existing.delete_vote.delete()
+                # add vote up if necessary:
+                # if adder is not author
+                if not self.object.author_code \
+                        or self.object.author_code != existing.author_code:
+                    vote = Vote(field_value=existing,
+                                value=Vote.VOTE_UP)
+                    if auth_code:
+                        vote.author_code = auth_code
+                    vote.save()
+                rules.update_fields(
+                    student_id,
+                    self.object.field_name,
+                )
+            return HttpResponseRedirect(self.get_success_url())
+        try:
+            self.object.target = Student.objects.get(id=student_id)
+        except Student.objects.DoesNotExist:
+            return Http404()
 
         self.object.save()
         vote = Vote(field_value=self.object,
