@@ -1,5 +1,4 @@
-a.student-window
-    | {{ student.name }}
+a.student-window {{ student.name }}
     - for n in student.ordered_facts.name
       - if n.status == 'trusted'
         |  ({{ n.field_value }})
