@@ -2,7 +2,7 @@ a.student-window {{ student.name }}
     - for n in student.ordered_facts.name
       - if n.status == 'trusted'
         |  ({{ n.field_value }})
-      - else
+      - elif n.status == 'untrusted'
         i  ({{ n.field_value }})
 
 - for n in student.ordered_facts.death_year
@@ -20,7 +20,7 @@ a.student-window {{ student.name }}
       - if modif.field_name == 'email'
         span.student-email.value-badge(class="value-{{ modif.status }}") @
 
-      - elif modif.field_name == 'degree' or modif.field_name == 'profession'
+      - elif modif.field_name in 'degree profession'
         span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
 
       - elif modif.field_name == 'city'
