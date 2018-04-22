@@ -6,6 +6,10 @@ a.student-window
       - else
         i  ({{ n.field_value }})
 
+- for n in student.ordered_facts.death_year
+  - if n.status == 'trusted'
+    | †&nbsp;<b>{{ n.field_value }}</b>
+
 - if show_grade
     a(href="{% url 'student-list'  %}?grade_id={{ student.main_grade.pk }}")
         span.value-badge {{ student.main_grade }}
@@ -16,6 +20,9 @@ a.student-window
 
       - if modif.field_name == 'email'
         span.student-email.value-badge(class="value-{{ modif.status }}") @
+
+      - elif modif.field_name == 'degree' or modif.field_name == 'profession'
+        span.value-badge(class="value-{{ modif.status }}") {{ modif.field_value }}
 
       - elif modif.field_name == 'city'
         a(href="{% url 'student-list' %}?query={{ modif.field_value }}",
@@ -41,3 +48,7 @@ a.student-window
         a(href="{{ modif.field_value }}",
             data-toggle="tooltip", data-placement="top", title="ВКонтакте")
           span.value-badge(class="value-{{ modif.status }}") vk
+      - elif name == 'social_li'
+        a(href="{{ modif.field_value }}",
+            data-toggle="tooltip", data-placement="top", title="LinkedIn")
+          span.value-badge(class="value-{{ modif.status }}") li
