@@ -45,6 +45,9 @@ class AdminFieldValue(admin.ModelAdmin):
 
 @admin.register(Vote)
 class AdminVote(admin.ModelAdmin):
+    def field_name(self):
+        return self.field_value.field_name
+
     def field_value(self):
         return self.field_value.field_value
 
@@ -52,7 +55,7 @@ class AdminVote(admin.ModelAdmin):
         return self.field_value.target
 
     ordering = ('field_value__target__name',)
-    list_display = (field_target, field_value, 'author_code', 'value')
+    list_display = (field_target, field_name, field_value, 'author_code', 'value')
     search_fields = ('field_value__target__name', 'field_value__field_name', 'field_value__field_value')
     list_filter = ('value',)
     readonly_fields = ('timestamp',)
