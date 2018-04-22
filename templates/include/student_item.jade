@@ -51,4 +51,10 @@ a.student-window {{ student.name }}
         a(href="{{ modif.field_value }}",
             data-toggle="tooltip", data-placement="top", title="LinkedIn")
           span.value-badge(class="value-{{ modif.status }}") linkedin
+
+      - elif name == 'wiki'
+        a(href="{{ modif.field_value }}",
+            data-toggle="tooltip", data-placement="top", title="Wikipedia")
+          span.value-badge(class="value-{{ modif.status }}") wiki
+
       {{ ' ' }}

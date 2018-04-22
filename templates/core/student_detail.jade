@@ -101,7 +101,7 @@ block content
                   - elif modification.field_name == 'social_li'
                       a(href="{{ modification.field_value }}")
                           | {{ modification.field_value }}
-                  - elif modification.field_name == 'link'
+                  - elif modification.field_name in 'link wiki'
                       a(href="{{ modification.field_value }}")
                           | {{ modification.field_value }}
                   - elif modification.field_name == 'email'

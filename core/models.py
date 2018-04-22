@@ -133,6 +133,7 @@ class FieldValue(Timestamped):
     FIELD_SOCIAL_LI = 'social_li'
     FIELD_GRADE = 'grade'
     FIELD_DEATH_YEAR = 'death_year'
+    FIELD_WIKI = 'wiki'
     EDITABLE_FIELDS = (
         (FIELD_NAME, 'Изменения фамилии / имени',
          'Если изменилась фамилия или имя после окончания школы, добавьте только измененную часть, она будет '
@@ -154,6 +155,7 @@ class FieldValue(Timestamped):
         (FIELD_SOCIAL_FB, 'Facebook', 'Укажите адрес профиля в Facebook, если выпусник им пользуется'),
         (FIELD_SOCIAL_VK, 'ВКонтакте', 'Укажите адрес профиля ВКонтакте, если выпусник им пользуется'),
         (FIELD_SOCIAL_LI, 'LinkedIn', 'Укажите адрес профиля LinkedIn, если выпусник им пользуется'),
+        (FIELD_WIKI, 'Wikipedia', 'Укажите адрес страницы выпускника на Wikipedia, если такая существует'),
         (FIELD_GRADE, 'Учился также в классе',
          'Выпускники, в первую очередь, приписываются к классу, с которым они закончили школу или из которого из нее '
          'ушли. Если они успели поучиться в другом классе, это можно указать дополнительно. Для указания класса '
@@ -165,6 +167,7 @@ class FieldValue(Timestamped):
         FIELD_SOCIAL_FB,
         FIELD_SOCIAL_VK,
         FIELD_SOCIAL_LI,
+        FIELD_WIKI
     )
 
     STATUS_TRUSTED = 'trusted'
