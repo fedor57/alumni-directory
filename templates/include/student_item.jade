@@ -1,3 +1,5 @@
+- load shorten_url
+
 a.student-window {{ student.name }}
     - for n in student.ordered_facts.name
       - if n.status == 'trusted'
@@ -36,7 +38,7 @@ a.student-window {{ student.name }}
       - elif name == 'link'
         a(href="{{ modif.field_value }}")
           span.value-badge(class="value-{{ modif.status }}")
-            | {{ modif.field_value }}
+            | {{ modif.field_value|shorten_url }}
 
       - elif name == 'social_fb'
         a(href="{{ modif.field_value }}",
