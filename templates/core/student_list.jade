@@ -66,7 +66,7 @@ block scripts
                 e.preventDefault()
                 t = $ e.target
                 f = nav.find '[name=field_name]'
-                f.val t.data 'feild-type'
+                f.val t.data 'field-type'
                 f.change()
                 $('#add-field').tab 'show'
 
@@ -78,20 +78,20 @@ block scripts
                         form.text 'OK'
                         setTimeout -> show_tabs student
                     ).fail( (xhr, _, __) ->
-                        field_value = $ '#from-add-fact input[name=field_value]'
+                        field_value = $ '#form-add-fact input[name=field_value]'
                         if xhr.responseJSON['field_value']
                             field_value.parent().addClass('has-error')
                             $('<div class="help-block"></div>').html(xhr.responseJSON['field_value'][0].message).insertAfter(field_value)
                     )
                 return false
-            nav.on 'submit', '#from-add-fact', send_form
+            nav.on 'submit', '#form-add-fact', send_form
             nav.on 'change', '#field-name', (e) ->
                 t = $ e.target
                 option = t.find ':selected'
                 if option.hasClass('empty-value')
-                    nav.find('button[type=submit]').attr('disabled', 'disabled')
+                    nav.find('#form-add-fact button[type=submit]').attr('disabled', 'disabled')
                 else
-                    nav.find('button[type=submit]').removeAttr('disabled')
+                    nav.find('#form-add-fact button[type=submit]').removeAttr('disabled')
                 $('#field-descr').text option.data('descr')
             nav.on 'submit', '#sendmail', send_form
 

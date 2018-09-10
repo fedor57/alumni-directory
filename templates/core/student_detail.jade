@@ -133,7 +133,7 @@ block content
         - else
           p Пока нет адреса email
           p
-            a.add-field(href="#", data-feild-type='email') Добавить
+            a.add-field(href="#", data-field-type='email') Добавить
       #tab-fb.tab-pane(role='tabpanel')
         br
         - if 'social_fb' in grouped_modifications
@@ -144,7 +144,7 @@ block content
         - else
           p Пока нет данных о социальной сети
         p
-          a.add-field(href="#", data-feild-type='social_fb') Добавить
+          a.add-field(href="#", data-field-type='social_fb') Добавить
       #tab-vk.tab-pane(role='tabpanel')
         br
         - if 'social_vk' in grouped_modifications
@@ -155,7 +155,7 @@ block content
         - else
           p Пока нет данных о социальной сети
         p
-          a.add-field(href="#", data-feild-type='social_vk') Добавить
+          a.add-field(href="#", data-field-type='social_vk') Добавить
       #tab-add.tab-pane(role='tabpanel')
         br
         include core/fieldvalue_form
