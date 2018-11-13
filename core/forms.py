@@ -17,7 +17,23 @@ class StudentCreateForm(forms.ModelForm):
         model = Student
         fields = ('name', 'graduation_year', 'grade_letter')
 
-    # TODO: add validation
+    def clean(self):
+        grade = list(Grade.objects.filter(
+            graduation_year=self.cleaned_data['graduation_year'],
+            letter=self.cleaned_data['grade_letter']
+        ).all())
+        if grade:
+            if Student.objects.filter(
+                main_grade_id=grade[0].id,
+                name=self.cleaned_data['name']
+            ).exists():
+                self.add_error(
+                    'name',
+                    ValidationError(
+                        u'Такой ученик уже существует.',
+                        code='bad_name'
+                    )
+                )
 
     def save(self, **kwargs):
         instance = super(StudentCreateForm, self).save(commit=False)
@@ -42,7 +58,7 @@ class FieldValueForm(forms.ModelForm):
 
     # def clean_author_code(self):
     #     TODO: validate
-        # return self.cleaned_data['author_code']
+    # return self.cleaned_data['author_code']
     def clean(self):
         name = self.cleaned_data['field_name']
         value = self.cleaned_data['field_value']
@@ -58,8 +74,6 @@ class FieldValueForm(forms.ModelForm):
                         params={'link': value}
                     )
                 )
-
-
 
 
 class SendMailForm(forms.ModelForm):
